@@ -1,27 +1,28 @@
-import {Client, REST, Routes} from "discord.js";
-import {join} from "path";
-import {readdirSync} from "fs";
-import {SlashCommand} from "../types";
+import { Client, REST, Routes } from 'discord.js';
+import { join } from 'path';
+import { readdirSync } from 'fs';
+import { SlashCommand } from '../types';
 
 module.exports = async (client: Client) => {
-  const body = []
-  const commandsDirs = join(__dirname, '../slashCommands');
+	const body = [];
+	const commandsDirs = join(__dirname, '../slashCommands');
 
-  readdirSync(commandsDirs).forEach((file) => {
-    if (!file.endsWith('.js')) return
+	readdirSync(commandsDirs).forEach((file) => {
+		if (!file.endsWith('.js')) return;
 
-    const command: SlashCommand = require(`${commandsDirs}/${file}`).command;
+		const command: SlashCommand = require(`${commandsDirs}/${file}`).command;
 
-    body.push(command.data.toJSON());
-    console.log(`Command ${command.name} loaded!`)
-    client.slashCommands.set(command.name, command);
-  })
+		body.push(command.data.toJSON());
+		console.log(`Command ${command.name} loaded!`);
+		client.slashCommands.set(command.name, command);
+	});
 
-  const rest = new REST({version: '10'}).setToken(process.env.TOKEN);
-  try {
-    await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {body});
-  } catch (e) {
-    console.error(e)
-  }
+	const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+	try {
+		await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body });
+	}
+	catch (e) {
+		console.error(e);
+	}
 
-}
+};
