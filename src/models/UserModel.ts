@@ -3,8 +3,8 @@ import mongoose from 'mongoose';
 export interface USER {
   discordId: string;
   rh_channel: string;
-  lastname: string;
-  firstName: string;
+	embed_message_id: string;
+  name: string
   phone: string;
   hiringDate: Date;
   accountNumber: string;
@@ -15,6 +15,10 @@ export interface USER {
   pole: string;
   number_weapon: number;
   last_medical_visit: Date;
+	next_medical_visit: Date;
+	updatedAt: Date;
+	createdAt: Date;
+	updatedBy: string;
 }
 
 const UserSchema = new mongoose.Schema({
@@ -24,10 +28,10 @@ const UserSchema = new mongoose.Schema({
 	rh_channel: {
 		type: String,
 	},
-	lastname: {
+	embed_message_id: {
 		type: String,
 	},
-	firstName: {
+	name: {
 		type: String,
 	},
 	phone: {
@@ -35,7 +39,6 @@ const UserSchema = new mongoose.Schema({
 	},
 	hiringDate: {
 		type: Date,
-		default: Date.now,
 	},
 	accountNumber: {
 		type: String,
@@ -56,8 +59,13 @@ const UserSchema = new mongoose.Schema({
 	},
 	last_medical_visit: {
 		type: Date,
-		default: Date.now,
 	},
-}, { versionKey: false });
+	next_medical_visit: {
+		type: Date,
+	},
+	updatedBy: {
+		type: String,
+	},
+}, { versionKey: false, timestamps: true });
 
 export default mongoose.models.User || mongoose.model('User', UserSchema);

@@ -4,7 +4,7 @@ import {
 	ChannelType,
 	PermissionsBitField,
 	User,
-	EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, TextChannel,
+	EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, TextChannel, CommandInteraction,
 } from 'discord.js';
 
 import UserSchema from '../models/UserModel';
@@ -27,16 +27,21 @@ export const command: SlashCommand = {
 		.setDescription('Permet de recruter le mec @ et créer son espace RH.')
 		.addUserOption(option => option.setName('membre').setDescription('Membre à recruter').setRequired(true))
 		.addRoleOption(option => option.setName('sexe').setDescription('Sexe du membre').setRequired(true)),
-	execute: async (interaction) => {
+	execute: async (interaction: CommandInteraction) => {
 		try {
+			// check if the user is an array of role (RH, ADMIN, HS)
+			const roles = [RH_ROLE_ID, ADMIN_ROLE_ID, HS_ROLE_ID];
+			if (!interaction.guild.members.cache.get(interaction.user.id).roles.cache.some(role => roles.includes(role.id))) {
+				return await interaction.reply({ content: 'Vous n\'avez pas la permission de faire cette commande !', ephemeral: true });
+			}
 			const memberUser: User = interaction.options.getUser('membre');
 			const genderRole = interaction.options.get('sexe').role;
 			if (![MAN_ID, WOMAN_ID].includes(genderRole.id)) {
 				return await interaction.reply({ content: 'Le sexe doit être un homme ou une femme !', ephemeral: true });
 			}
 			await interaction.guild.members.cache.get(memberUser.id).roles.add([genderRole.id, AGENT_ROLE_ID, STAGIAIRE_ROLE_ID]);
-			const [firstName, lastName] = (await interaction.guild.members.fetch(memberUser.id)).nickname.split(' ');
-			const channelName = genderRole.id === MAN_ID ? `👨•${firstName}-${lastName}` : `👩•${firstName}-${lastName}`;
+			const name = (await interaction.guild.members.fetch(memberUser.id)).nickname;
+			const channelName = genderRole.id === MAN_ID ? `👨•${name}` : `👩•${name}`;
 			const channel = await interaction.guild.channels.create({
 				name: channelName,
 				type: ChannelType.GuildText,
@@ -50,59 +55,67 @@ export const command: SlashCommand = {
 				],
 			});
 
-			await createUserSchema(memberUser, channel, firstName, lastName);
-			await sendEmbedMessage(channel, memberUser, firstName, lastName);
+			const updatedBy = interaction.user.id;
+			const nickNameUpdatedBy = (await interaction.guild.members.fetch(updatedBy)).nickname;
+
+			const embed = await sendEmbedMessage(memberUser, { name: name, updatedBy: nickNameUpdatedBy });
+			const sentMessage = await channel.send({ embeds: [embed.embed], components: [embed.row] });
+			const embedId = sentMessage.id;
+
+			await createUserSchema(memberUser, channel, name, embedId, interaction.user.id);
 
 			await interaction.reply({ content: `Le channel ${channel} a été créé !` });
-		}
-		catch (e) {
+		} catch (e) {
 			console.error(e);
 			await interaction.reply({ content: 'An error occurred while processing the command.', ephemeral: true });
 		}
 	},
 };
 
-async function createUserSchema(memberUser: User, channel: TextChannel, firstName: string, lastName: string) {
+async function createUserSchema(memberUser: User, channel: TextChannel, name: string, embedId: string, createdBy?: string) {
 	return await UserSchema.create({
 		discordId: memberUser.id,
 		rh_channel: channel.id,
-		lastname: lastName,
-		firstName: firstName,
-		phone: '555-XXXX',
-		hiringDate: Date.now(),
-		accountNumber: '___Z____T___',
-		role: {
-			_id: STAGIAIRE_ROLE_ID,
-			name: 'En Formation',
-		},
-		pole: 'Opérationnel',
-		number_weapon: 0,
-		last_medical_visit: Date.now(),
+		embed_message_id: embedId,
+		name: name,
+		phone: undefined,
+		hiringDate: undefined,
+		accountNumber: undefined,
+		role: undefined,
+		pole: undefined,
+		number_weapon: undefined,
+		last_medical_visit: undefined,
+		updatedBy: createdBy,
 	});
 }
 
-async function sendEmbedMessage(channel: TextChannel, memberUser: User, firstName: string, lastName: string) {
-	const embed = new EmbedBuilder()
+export async function sendEmbedMessage(memberUser: User, content: { name?: string, phone?: string, hiringDate?: string, accountNumber?: string, role?: string, pole?: string, number_weapon?: string, lastMedicalVisit?: string, nextMedicalVisit?: string, updatedBy?: string } = { name: ' ', phone: ' ', hiringDate: ' ', accountNumber: ' ', role: ' ', pole: ' ', number_weapon: ' ', lastMedicalVisit: ' ', nextMedicalVisit: ' ', updatedBy: ' ' }) {
+	 const embed = new EmbedBuilder()
 		.setAuthor({ name: 'Gerard' })
 		.setTitle('Bienvenue dans ton espace RH !')
 		.addFields(
-			{ name: 'Nom', value: lastName },
-			{ name: 'Prénom', value: firstName },
-			{ name: 'Téléphone', value: '555-XXXX' },
-			{ name: 'Date Embauche', value: 'XX/XX/XXXX' },
-			{ name: 'Numéro de compte', value: '___Z____T___' },
-			{ name: 'Poste', value: 'En Formation' },
-			{ name: 'Pôle ', value: 'Opérationnel' },
-			{ name: 'Matricule arme', value: 'XX' },
+			{ name: 'Nom', value: content.name || ' ', inline: true },
+			{ name: 'Téléphone', value: content.phone || ' ', inline: true },
+			{ name: 'Date Embauche', value: content.hiringDate || ' ' },
+			{ name: 'Numéro de compte', value: content.accountNumber || ' ' },
+			{ name: 'Poste', value: content.role || ' ' },
+			{ name: 'Pôle ', value: content.pole || ' ' },
+			{ name: 'Matricule arme', value: content.number_weapon || ' ' },
+			{ name: 'Dernière visite médicale', value: content.lastMedicalVisit || ' ', inline: true },
+			{ name: 'Prochaine visite médicale', value: content.nextMedicalVisit || ' ', inline: true },
 		)
 		.setThumbnail(memberUser.displayAvatarURL())
-		.setColor('#ff8e4d');
+		.setColor('#8EFF55')
+		 .setFooter({ text: `Mis à jour par ${content.updatedBy}` });
 
 	const row :any = new ActionRowBuilder()
 		.addComponents(
-			new ButtonBuilder().setStyle(ButtonStyle.Primary).setLabel('Modifier').setCustomId('edit_user'),
+			new ButtonBuilder().setStyle(ButtonStyle.Primary).setLabel('Modifier les informations personel').setCustomId('edit_perso_user'),
+			new ButtonBuilder().setStyle(ButtonStyle.Success).setLabel('Modifier les informations professionnel').setCustomId('edit_pro_user'),
+			new ButtonBuilder().setStyle(ButtonStyle.Secondary).setLabel('Modifier le poste').setCustomId('edit_role_user'),
+			new ButtonBuilder().setStyle(ButtonStyle.Secondary).setLabel('Modifier le pole').setCustomId('edit_pole_user'),
 			new ButtonBuilder().setStyle(ButtonStyle.Danger).setLabel('Licencier').setCustomId('fire_user'),
 		);
+	return { embed, row };
 
-	return await channel.send({ embeds: [embed], components: [row] });
 }

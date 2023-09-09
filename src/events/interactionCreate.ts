@@ -12,14 +12,12 @@ const event: BotEvent = {
 			if (!commands) return;
 
 			await commands.execute(interaction);
-		}
-		else if (interaction.isButton()) {
+		} else if (interaction.isButton()) {
 			const buttons = interaction.client.buttons.get(interaction.customId);
 			if (!buttons) return;
 			await buttons.execute(interaction);
 
-		}
-		else if (interaction.type === InteractionType.ModalSubmit) {
+		} else if (interaction.type === InteractionType.ModalSubmit) {
 			const { modals } = interaction.client;
 			const modal = modals.get(interaction.customId);
 			if (!modal) return;
