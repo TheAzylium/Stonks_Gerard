@@ -1,7 +1,7 @@
-import { Modals } from '../../types';
+import { Modals } from '../../../types';
 import { ModalSubmitInteraction } from 'discord.js';
-import UserSchema, { USER } from '../../models/UserModel';
-import { sendEmbedMessage } from '../../slashCommands/hiring';
+import UserSchema, { USER } from '../../../models/UserModel';
+import { sendEmbedMessage } from '../../../slashCommands/rh/hiring';
 import dayjs from 'dayjs';
 dayjs.extend(require('dayjs/plugin/customParseFormat'));
 

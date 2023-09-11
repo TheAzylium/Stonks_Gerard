@@ -1,11 +1,11 @@
-import { Buttons } from '../../types';
+import { Buttons } from '../../../types';
 const {
   ActionRowBuilder,
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
 } = require('discord.js');
-import UserSchema, { USER } from '../../models/UserModel';
+import UserSchema, { USER } from '../../../models/UserModel';
 require('dayjs');
 const { RH_ROLE_ID, ADMIN_ROLE_ID, HS_ROLE_ID } = process.env;
 export const button: Buttons = {

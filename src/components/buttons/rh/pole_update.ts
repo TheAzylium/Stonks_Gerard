@@ -1,6 +1,6 @@
-import { Buttons } from '../../types';
+import { Buttons } from '../../../types';
 import { StringSelectMenuBuilder } from 'discord.js';
-import { PoleList } from '../../const/PolesList';
+import { PoleList } from '../../../const/PolesList';
 const { ActionRowBuilder } = require('discord.js');
 const wait = require('node:timers/promises').setTimeout;
 const { RH_ROLE_ID, ADMIN_ROLE_ID, HS_ROLE_ID } = process.env;

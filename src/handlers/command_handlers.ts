@@ -7,15 +7,16 @@ module.exports = async (client: Client) => {
   const body = [];
   const commandsDirs = join(__dirname, '../slashCommands');
 
-  readdirSync(commandsDirs).forEach((file) => {
-    if (!file.endsWith('.js')) return;
+  readdirSync(commandsDirs).forEach((dir) => {
+    readdirSync(`${commandsDirs}/${dir}`).forEach((file) => {
+      if (!file.endsWith('.js')) return;
 
-    const command: SlashCommand = require(`${commandsDirs}/${file}`).command;
-
-    body.push(command.data.toJSON());
-    console.log(`Command ${command.name} loaded!`);
-    client.slashCommands.set(command.name, command);
-  });
+      const command: SlashCommand = require(`${commandsDirs}/${dir}/${file}`).command;
+      body.push(command.data.toJSON());
+      console.log(`Command ${command.name} loaded!`);
+      client.slashCommands.set(command.name, command);
+    });
+  })
 
   const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
   try {

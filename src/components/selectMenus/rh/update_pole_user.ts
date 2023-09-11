@@ -1,30 +1,38 @@
-import { SelectMenu } from '../../types';
+import { SelectMenu } from '../../../types';
 import { StringSelectMenuInteraction } from 'discord.js';
-import UserSchema, { USER } from '../../models/UserModel';
-import RhHistorySchema from '../../models/RhHistoryModel';
+import UserSchema, { USER } from '../../../models/UserModel';
+import RhHistorySchema from '../../../models/RhHistoryModel';
 
 import dayjs from 'dayjs';
-import { PosteList } from '../../const/RolesList';
-import { sendEmbedMessage } from '../../slashCommands/hiring';
+import { sendEmbedMessage } from '../../../slashCommands/rh/hiring';
+import { PoleList } from '../../../const/PolesList';
+
 dayjs.extend(require('dayjs/plugin/customParseFormat'));
 
 const wait = require('node:timers/promises').setTimeout;
 
 export const modals: SelectMenu = {
   data: {
-    name: 'roles_update',
+    name: 'poles_update',
   },
   execute: async (interaction: StringSelectMenuInteraction) => {
-    const newRole = {
-      _id: interaction.values[0],
-      name: PosteList.find((option) => option.value === interaction.values[0])
-        ?.label,
-    };
-
+    let newPole: { _id: string; name: string };
+    if (interaction.values[0] === '1') {
+      newPole = {
+        _id: undefined,
+        name: 'Opérationnel',
+      };
+    } else {
+      newPole = {
+        _id: interaction.values[0],
+        name: PoleList.find((option) => option.value === interaction.values[0])
+          ?.label,
+      };
+    }
     const updatedUser: USER = await UserSchema.findOneAndUpdate(
       { rh_channel: interaction.channelId },
       {
-        role: newRole,
+        pole: newPole,
         updatedBy: interaction.user.id,
       },
       { new: true },
@@ -46,7 +54,6 @@ export const modals: SelectMenu = {
     if (updatedUser.role?._id) {
       roles.push(updatedUser.role._id);
     }
-    // console.log()
     await memberUser.roles.set(roles);
 
     const updatedBy = (
@@ -55,7 +62,7 @@ export const modals: SelectMenu = {
 
     await RhHistorySchema.create({
       discordId: updatedUser.discordId,
-      newRole: newRole,
+      newRole: newPole,
       updatedBy,
     });
 
@@ -84,7 +91,7 @@ export const modals: SelectMenu = {
     await message.edit({ embeds: [newEmbed.embed] });
 
     await interaction.reply({
-      content: 'Le poste à été mis à jour !',
+      content: 'Le pôle à été mis à jour !',
       ephemeral: true,
     });
     await wait(5000);

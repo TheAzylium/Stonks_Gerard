@@ -1,38 +1,30 @@
-import { SelectMenu } from '../../types';
+import { SelectMenu } from '../../../types';
 import { StringSelectMenuInteraction } from 'discord.js';
-import UserSchema, { USER } from '../../models/UserModel';
-import RhHistorySchema from '../../models/RhHistoryModel';
+import UserSchema, { USER } from '../../../models/UserModel';
+import RhHistorySchema from '../../../models/RhHistoryModel';
 
 import dayjs from 'dayjs';
-import { sendEmbedMessage } from '../../slashCommands/hiring';
-import { PoleList } from '../../const/PolesList';
-
+import { PosteList } from '../../../const/RolesList';
+import { sendEmbedMessage } from '../../../slashCommands/rh/hiring';
 dayjs.extend(require('dayjs/plugin/customParseFormat'));
 
 const wait = require('node:timers/promises').setTimeout;
 
 export const modals: SelectMenu = {
   data: {
-    name: 'poles_update',
+    name: 'roles_update',
   },
   execute: async (interaction: StringSelectMenuInteraction) => {
-    let newPole: { _id: string; name: string };
-    if (interaction.values[0] === '1') {
-      newPole = {
-        _id: undefined,
-        name: 'Opérationnel',
-      };
-    } else {
-      newPole = {
-        _id: interaction.values[0],
-        name: PoleList.find((option) => option.value === interaction.values[0])
-          ?.label,
-      };
-    }
+    const newRole = {
+      _id: interaction.values[0],
+      name: PosteList.find((option) => option.value === interaction.values[0])
+        ?.label,
+    };
+
     const updatedUser: USER = await UserSchema.findOneAndUpdate(
       { rh_channel: interaction.channelId },
       {
-        pole: newPole,
+        role: newRole,
         updatedBy: interaction.user.id,
       },
       { new: true },
@@ -62,7 +54,7 @@ export const modals: SelectMenu = {
 
     await RhHistorySchema.create({
       discordId: updatedUser.discordId,
-      newRole: newPole,
+      newRole: newRole,
       updatedBy,
     });
 
@@ -91,7 +83,7 @@ export const modals: SelectMenu = {
     await message.edit({ embeds: [newEmbed.embed] });
 
     await interaction.reply({
-      content: 'Le pôle à été mis à jour !',
+      content: 'Le poste à été mis à jour !',
       ephemeral: true,
     });
     await wait(5000);

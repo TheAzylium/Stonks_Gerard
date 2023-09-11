@@ -1,4 +1,4 @@
-import { SlashCommand } from '../types';
+import { SlashCommand } from '../../types';
 import {
   SlashCommandBuilder,
   ChannelType,
@@ -12,8 +12,8 @@ import {
   CommandInteraction,
 } from 'discord.js';
 
-import UserSchema from '../models/UserModel';
-import RhHistorySchema from '../models/RhHistoryModel';
+import UserSchema from '../../models/UserModel';
+import RhHistorySchema from '../../models/RhHistoryModel';
 
 const {
   MAN_ID,

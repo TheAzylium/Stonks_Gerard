@@ -2,27 +2,24 @@ export const EntrepriseList = [
   {
     name: 'FightForSub',
     accronyme: 'FFS',
-    emoji: '👊',
   },
   {
     name: 'New Gahray',
     accronyme: 'NG',
-    emoji: '🌌',
   },
   {
     name: 'Blaine County Sheriff Office',
     accronyme: 'BCSO',
-    emoji: '🚔',
+    saisie: true,
   },
   {
     name: 'Los Santos Police Department',
     accronyme: 'LSPD',
-    emoji: '🚔',
+    saisie: true,
   },
   {
     name: 'Chateau Marius',
     accronyme: 'CM',
-    emoji: '🍷',
   },
   {
     name: 'BlueBird',
@@ -35,46 +32,38 @@ export const EntrepriseList = [
   {
     name: 'Los Santos Medical Center',
     accronyme: 'LSMC',
-    emoji: '🚑',
   },
   {
     name: 'San Andreas State Police',
     accronyme: 'SASP',
-    emoji: '🚔',
+    saisie: true,
   },
   {
     name: 'STONK',
     accronyme: 'STONK',
-    emoji: '📈',
   },
   {
-    name: 'Twitch News',
+    name: ' Twitch News',
     accronyme: 'TN',
-    emoji: '📺',
   },
   {
     name: 'Pipe And Wooden Leg',
     accronyme: 'PAWL',
-    emoji: '🐾',
   },
   {
     name: 'Michel Transport Petrol',
     accronyme: 'MTP',
-    emoji: '🚔',
   },
   {
     name: 'Mandatory',
     accronyme: 'MNT',
-    emoji: '🚬',
   },
   {
     name: 'Bahamas Unicorn',
     accronyme: 'BAUN',
-    emoji: '🦄',
   },
   {
     name: 'Unexpected Power & Water',
     accronyme: 'UPW',
-    emoji: '💧',
   },
 ];

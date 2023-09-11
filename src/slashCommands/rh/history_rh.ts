@@ -3,10 +3,10 @@ import {
   EmbedBuilder,
   SlashCommandBuilder,
 } from 'discord.js';
-import { SlashCommand } from '../types';
+import { SlashCommand } from '../../types';
 import dayjs from 'dayjs';
 dayjs.extend(require('dayjs/plugin/customParseFormat'));
-import RhHistorySchema, { RHHISTORY } from '../models/RhHistoryModel';
+import RhHistorySchema, { RHHISTORY } from '../../models/RhHistoryModel';
 
 const { RH_ROLE_ID, ADMIN_ROLE_ID, HS_ROLE_ID } = process.env;
 export const command: SlashCommand = {
@@ -40,7 +40,6 @@ export const command: SlashCommand = {
         ephemeral: true,
       });
     }
-    console.log(date);
     const dateFormated = dayjs(date, 'DD/MM/YYYY').toDate();
 
     const history: RHHISTORY[] = await RhHistorySchema.find({

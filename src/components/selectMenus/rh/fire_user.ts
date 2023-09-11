@@ -1,9 +1,9 @@
-import { SelectMenu } from '../../types';
+import { SelectMenu } from '../../../types';
 import { PermissionsBitField, StringSelectMenuInteraction } from 'discord.js';
-import UserSchema, { USER } from '../../models/UserModel';
-import RhHistorySchema from '../../models/RhHistoryModel';
+import UserSchema, { USER } from '../../../models/UserModel';
+import RhHistorySchema from '../../../models/RhHistoryModel';
 import dayjs from 'dayjs';
-import { sendEmbedMessage } from '../../slashCommands/hiring';
+import { sendEmbedMessage } from '../../../slashCommands/rh/hiring';
 dayjs.extend(require('dayjs/plugin/customParseFormat'));
 
 const wait = require('node:timers/promises').setTimeout;
@@ -19,7 +19,6 @@ export const modals: SelectMenu = {
         ephemeral: true,
       });
     } else {
-      console.log('la');
       const updatedUser: USER = await UserSchema.findOneAndUpdate(
         { rh_channel: interaction.channelId },
         {

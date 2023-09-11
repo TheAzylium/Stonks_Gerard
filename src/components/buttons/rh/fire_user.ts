@@ -1,16 +1,15 @@
-import { Buttons } from '../../types';
+import { Buttons } from '../../../types';
 import { StringSelectMenuBuilder } from 'discord.js';
-import { PosteList } from '../../const/RolesList';
 const { ActionRowBuilder } = require('discord.js');
 const wait = require('node:timers/promises').setTimeout;
-const { RH_ROLE_ID, ADMIN_ROLE_ID, HS_ROLE_ID } = process.env;
+const { ADMIN_ROLE_ID, HS_ROLE_ID } = process.env;
 require('dayjs');
 export const button: Buttons = {
   data: {
-    name: 'edit_role_user',
+    name: 'fire_user',
   },
   execute: async (interaction) => {
-    const roles = [RH_ROLE_ID, ADMIN_ROLE_ID, HS_ROLE_ID];
+    const roles = [ADMIN_ROLE_ID, HS_ROLE_ID];
     if (
       !interaction.guild.members.cache
         .get(interaction.user.id)
@@ -25,12 +24,15 @@ export const button: Buttons = {
     const menu = new StringSelectMenuBuilder()
       .setMinValues(1)
       .setMaxValues(1)
-      .setCustomId('roles_update')
-      .setPlaceholder('Choisissez un rôle')
-      .setOptions(PosteList);
+      .setCustomId('fire_user')
+      .setPlaceholder('Oui/Non')
+      .setOptions([
+        { label: 'Oui', value: '1' },
+        { label: 'Non', value: '2' },
+      ]);
 
     await interaction.reply({
-      content: 'Choisissez un rôle',
+      content: 'Etes vous sur de vouloir virer cette personne',
       components: [new ActionRowBuilder().addComponents(menu)],
       ephemeral: true,
     });

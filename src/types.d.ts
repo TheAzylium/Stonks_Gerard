@@ -55,6 +55,9 @@ declare global {
       STAGIAIRE_ROLE_ID: string;
       RH_CATEGORY_ID: string;
       MONGODB_URI: string;
+      ORDER_OF_THE_DAY_PRIVATE_CHANNEL_ID: string;
+      ORDER_OF_THE_DAY_PUBLIC_CHANNEL_ID: string;
+      FORMATION_CHANNEL_ID: string;
     }
   }
 }
