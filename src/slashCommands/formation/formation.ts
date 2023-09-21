@@ -1,4 +1,4 @@
-import { SlashCommand } from '../../types'
+import { SlashCommand } from '../../types';
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -6,11 +6,11 @@ import {
   CommandInteraction,
   SlashCommandBuilder,
   TextChannel,
-} from 'discord.js'
+} from 'discord.js';
 
-import FormationSchema, { FORMATION } from '../../models/FormatationModel'
+import FormationSchema, { FORMATION } from '../../models/FormatationModel';
 
-const { FORMATION_CHANNEL_ID, STAGIAIRE_ROLE_ID } = process.env
+const { FORMATION_CHANNEL_ID, STAGIAIRE_ROLE_ID } = process.env;
 
 export const command: SlashCommand = {
   name: 'formation',
@@ -31,17 +31,17 @@ export const command: SlashCommand = {
     ),
   execute: async (interaction: CommandInteraction) => {
     try {
-      const target = interaction.options.getUser('membre')
+      const target = interaction.options.getUser('membre');
       const nicknameTarget = (await interaction.guild.members.fetch(target.id))
-        .nickname
-      const phone: string = interaction.options.get('phone').value?.toString()
+        .nickname;
+      const phone: string = interaction.options.get('phone').value?.toString();
 
       // Check si il respect le format de 555-XXXX ou X = 0-9
       if (phone && !phone.match(/555-\d{4}/)) {
         return await interaction.reply({
           content: 'Le numéro de téléphone doit être au format 555-XXXX !',
           ephemeral: true,
-        })
+        });
       }
 
       // Check si le membre est déjà dans la base de donnée
@@ -50,16 +50,16 @@ export const command: SlashCommand = {
         discordId: target.id,
       })
         .select('_id messageId')
-        .lean()
+        .lean();
       if (targetUser) {
-        const guildId = interaction.guildId
-        const linkToMessage = `https://discord.com/channels/${guildId}/${FORMATION_CHANNEL_ID}/${targetUser.messageId}`
+        const guildId = interaction.guildId;
+        const linkToMessage = `https://discord.com/channels/${guildId}/${FORMATION_CHANNEL_ID}/${targetUser.messageId}`;
         // Dire que le membre est déjà dans la base de donnée avec le lien du message avec messageId
         return await interaction.reply({
           content:
             'Le membre est déjà dans la base de donnée :' + linkToMessage,
           ephemeral: true,
-        })
+        });
       } else {
         // const embed = new EmbedBuilder()
         // 	.setAuthor({ name: nicknameTarget, iconURL: target.avatarURL() })
@@ -81,7 +81,7 @@ export const command: SlashCommand = {
             .setCustomId('change_rank')
             .setLabel('Changer de grade')
             .setStyle(ButtonStyle.Success),
-        )
+        );
 
         const message = await (
           interaction.guild.channels.cache.get(
@@ -90,7 +90,7 @@ export const command: SlashCommand = {
         ).send({
           content: `__En formation__ :  **${nicknameTarget}** ♦${phone}♦`,
           components: [row as any],
-        })
+        });
 
         await new FormationSchema({
           discordId: target.id,
@@ -100,19 +100,19 @@ export const command: SlashCommand = {
             name: 'En formation',
           },
           formations: [],
-        }).save()
+        }).save();
 
         return await interaction.reply({
           content: 'Le membre est maintenant en formation !',
           ephemeral: true,
-        })
+        });
       }
     } catch (e) {
-      console.error(e)
+      console.error(e);
       await interaction.reply({
         content: 'An error occurred while processing the command.',
         ephemeral: true,
-      })
+      });
     }
   },
-}
+};

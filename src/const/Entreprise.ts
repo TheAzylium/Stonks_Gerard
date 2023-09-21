@@ -66,4 +66,4 @@ export const EntrepriseList = [
     name: 'Unexpected Power & Water',
     accronyme: 'UPW',
   },
-]
+];

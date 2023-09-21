@@ -1,13 +1,13 @@
-import { SlashCommand } from '../../types'
+import { SlashCommand } from '../../types';
 import {
   CommandInteraction,
   SlashCommandBuilder,
   TextChannel,
-} from 'discord.js'
+} from 'discord.js';
 
-import ActivityMonitoringSchema from '../../models/MonitoringActivityModel'
+import ActivityMonitoringSchema from '../../models/MonitoringActivityModel';
 
-const { SUIVI_ACTIVITY_CHANNEL_ID } = process.env
+const { SUIVI_ACTIVITY_CHANNEL_ID } = process.env;
 
 export const command: SlashCommand = {
   name: 'upw',
@@ -18,15 +18,15 @@ export const command: SlashCommand = {
     try {
       const channel = interaction.guild.channels.cache.get(
         SUIVI_ACTIVITY_CHANNEL_ID,
-      ) as TextChannel
+      ) as TextChannel;
 
       const message = await channel.send(
         `⚡ Livraison UPW : Remplissage de la borne`,
-      )
+      );
 
       const nicknameSender = (
         await interaction.guild.members.fetch(interaction.user.id)
-      ).nickname
+      ).nickname;
 
       await new ActivityMonitoringSchema({
         messageId: message.id,
@@ -38,17 +38,17 @@ export const command: SlashCommand = {
           name: 'UPW',
           number: 0,
         },
-      }).save()
+      }).save();
       await interaction.reply({
         content: 'Le remplissage UPW a bien été déclaré !',
         ephemeral: true,
-      })
+      });
     } catch (e) {
-      console.error(e)
+      console.error(e);
       await interaction.reply({
         content: 'An error occurred while processing the command.',
         ephemeral: true,
-      })
+      });
     }
   },
-}
+};

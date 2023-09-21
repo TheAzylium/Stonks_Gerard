@@ -1,14 +1,14 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
 export interface RHHISTORY {
-  discordId: string
-  updatedAt: Date
-  createdAt: Date
+  discordId: string;
+  updatedAt: Date;
+  createdAt: Date;
   newRole: {
-    _id: string
-    name: string
-  }
-  updatedBy: string
+    _id: string;
+    name: string;
+  };
+  updatedBy: string;
 }
 
 const RhHistorySchema = new mongoose.Schema(
@@ -29,6 +29,6 @@ const RhHistorySchema = new mongoose.Schema(
     },
   },
   { versionKey: false, timestamps: true },
-)
+);
 
-export default mongoose.model<RHHISTORY>('RhHistory', RhHistorySchema)
+export default mongoose.model<RHHISTORY>('RhHistory', RhHistorySchema);

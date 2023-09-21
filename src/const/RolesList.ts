@@ -27,4 +27,4 @@ export const PosteList = [
     label: 'Head Security',
     value: process.env.HS_ROLE_ID,
   },
-]
+];

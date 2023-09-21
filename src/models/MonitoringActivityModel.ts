@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
 const activityPossibility: string[] = [
   'MTP',
@@ -7,22 +7,22 @@ const activityPossibility: string[] = [
   'PAWL',
   'MISSINGGILET',
   'MISSINGTENUE',
-]
-type ActivityName = (typeof activityPossibility)[number]
+];
+type ActivityName = (typeof activityPossibility)[number];
 
 export interface ACTIVITYMONITORING {
-  _id: string
-  messageId: string
+  _id: string;
+  messageId: string;
   sendBy: {
-    _id: string
-    name: string
-  }
+    _id: string;
+    name: string;
+  };
   activity: {
-    name: ActivityName
-    number?: number
-  }
-  createAt: Date
-  updatedAt: Date
+    name: ActivityName;
+    number?: number;
+  };
+  createAt: Date;
+  updatedAt: Date;
 }
 
 const ActivityMonitoringSchema = new mongoose.Schema(
@@ -49,9 +49,9 @@ const ActivityMonitoringSchema = new mongoose.Schema(
     },
   },
   { timestamps: true, versionKey: false },
-)
+);
 
 export default mongoose.model<ACTIVITYMONITORING>(
   'ActivityMonitoring',
   ActivityMonitoringSchema,
-)
+);

@@ -1,8 +1,8 @@
 export const Formation: {
-  _id: string
-  name: string
-  emoji: string
-  tier: number
+  _id: string;
+  name: string;
+  emoji: string;
+  tier: number;
 }[] = [
   {
     _id: '1',
@@ -124,4 +124,4 @@ export const Formation: {
     emoji: '⚔️',
     tier: 3,
   },
-]
+];

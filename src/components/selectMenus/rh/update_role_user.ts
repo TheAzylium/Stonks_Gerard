@@ -1,14 +1,14 @@
-import { SelectMenu } from '../../../types'
-import { StringSelectMenuInteraction } from 'discord.js'
-import UserSchema, { USER } from '../../../models/UserModel'
-import RhHistorySchema from '../../../models/RhHistoryModel'
+import { SelectMenu } from '../../../types';
+import { StringSelectMenuInteraction } from 'discord.js';
+import UserSchema, { USER } from '../../../models/UserModel';
+import RhHistorySchema from '../../../models/RhHistoryModel';
 
-import dayjs from 'dayjs'
-import { PosteList } from '../../../const/RolesList'
-import { sendEmbedMessage } from '../../../slashCommands/rh/hiring'
-dayjs.extend(require('dayjs/plugin/customParseFormat'))
+import dayjs from 'dayjs';
+import { PosteList } from '../../../const/RolesList';
+import { sendEmbedMessage } from '../../../slashCommands/rh/hiring';
+dayjs.extend(require('dayjs/plugin/customParseFormat'));
 
-const wait = require('node:timers/promises').setTimeout
+const wait = require('node:timers/promises').setTimeout;
 
 export const modals: SelectMenu = {
   data: {
@@ -19,7 +19,7 @@ export const modals: SelectMenu = {
       _id: interaction.values[0],
       name: PosteList.find(option => option.value === interaction.values[0])
         ?.label,
-    }
+    };
 
     const updatedUser: USER = await UserSchema.findOneAndUpdate(
       { rh_channel: interaction.channelId },
@@ -28,35 +28,35 @@ export const modals: SelectMenu = {
         updatedBy: interaction.user.id,
       },
       { new: true },
-    ).lean()
+    ).lean();
 
     const memberUser = await interaction.guild.members.fetch(
       updatedUser.discordId,
-    )
+    );
     await memberUser.roles.remove(
       memberUser.roles.cache.filter(
         role => role.id !== interaction.guild.roles.everyone.id,
       ),
-    )
-    const roles = [updatedUser.sex, process.env.AGENT_ROLE_ID]
+    );
+    const roles = [updatedUser.sex, process.env.AGENT_ROLE_ID];
 
     if (updatedUser.pole?._id) {
-      roles.push(updatedUser.pole._id)
+      roles.push(updatedUser.pole._id);
     }
     if (updatedUser.role?._id) {
-      roles.push(updatedUser.role._id)
+      roles.push(updatedUser.role._id);
     }
-    await memberUser.roles.set(roles)
+    await memberUser.roles.set(roles);
 
     const updatedBy = (
       await interaction.guild.members.fetch(updatedUser.updatedBy)
-    ).nickname
+    ).nickname;
 
     await RhHistorySchema.create({
       discordId: updatedUser.discordId,
       newRole: newRole,
       updatedBy,
-    })
+    });
 
     const newEmbed = await sendEmbedMessage(memberUser.user, {
       name: updatedUser.name,
@@ -75,20 +75,20 @@ export const modals: SelectMenu = {
         ? dayjs(updatedUser.next_medical_visit).format('DD/MM/YYYY')
         : ' ',
       updatedBy: updatedBy,
-    })
+    });
 
     const message: any = await interaction.channel.messages.fetch(
       updatedUser.embed_message_id,
-    )
-    await message.edit({ embeds: [newEmbed.embed] })
+    );
+    await message.edit({ embeds: [newEmbed.embed] });
 
     await interaction.reply({
       content: 'Le poste à été mis à jour !',
       ephemeral: true,
-    })
-    await wait(5000)
-    await interaction.deleteReply()
+    });
+    await wait(5000);
+    await interaction.deleteReply();
   },
-}
+};
 
-export default modals
+export default modals;

@@ -1,21 +1,21 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
 export interface ORDER_OF_THE_DAY {
-  _id: string
-  day: Date
-  embed_private_message_id: string
-  embed_public_message_id: string
-  updatedAt: Date
-  createdAt: Date
+  _id: string;
+  day: Date;
+  embed_private_message_id: string;
+  embed_public_message_id: string;
+  updatedAt: Date;
+  createdAt: Date;
   missions: [
     {
-      _id: string
-      target: string
-      hour: string
-      nbrAgent?: string
-      type: 'SAISIE' | 'SECURITY' | 'TRANSFERT'
+      _id: string;
+      target: string;
+      hour: string;
+      nbrAgent?: string;
+      type: 'SAISIE' | 'SECURITY' | 'TRANSFERT';
     },
-  ]
+  ];
 }
 
 const OrderOfTheDaySchema = new mongoose.Schema(
@@ -48,7 +48,7 @@ const OrderOfTheDaySchema = new mongoose.Schema(
     },
   },
   { timestamps: true, versionKey: false },
-)
+);
 
 export default mongoose.models.OrderOfTheDay ||
-  mongoose.model('OrderOfTheDay', OrderOfTheDaySchema)
+  mongoose.model('OrderOfTheDay', OrderOfTheDaySchema);

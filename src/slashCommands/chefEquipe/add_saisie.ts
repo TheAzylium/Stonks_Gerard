@@ -1,10 +1,10 @@
-import { SlashCommand } from '../../types'
-import { CommandInteraction, SlashCommandBuilder } from 'discord.js'
-import { EntrepriseList } from '../../const/Entreprise'
-import dayjs from 'dayjs'
+import { SlashCommand } from '../../types';
+import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { EntrepriseList } from '../../const/Entreprise';
+import dayjs from 'dayjs';
 import OrderOfTheDaySchema, {
   ORDER_OF_THE_DAY,
-} from '../../models/OrderOfTheDayModel'
+} from '../../models/OrderOfTheDayModel';
 
 export const command: SlashCommand = {
   name: 'addsaisie',
@@ -38,9 +38,9 @@ export const command: SlashCommand = {
         .setRequired(true),
     ),
   execute: async (interaction: CommandInteraction) => {
-    const entreprise = interaction.options.get('entreprise').value
-    const jour: string = interaction.options.get('jour').value.toString()
-    const heure: string = interaction.options.get('heure').value.toString()
+    const entreprise = interaction.options.get('entreprise').value;
+    const jour: string = interaction.options.get('jour').value.toString();
+    const heure: string = interaction.options.get('heure').value.toString();
 
     // check format jour
     if (
@@ -49,40 +49,40 @@ export const command: SlashCommand = {
     ) {
       return await interaction.reply({
         content: 'Le format du jour est incorrect !',
-      })
+      });
     }
     if (heure && !heure.match(/^([01]\d|2[0-3]):?([0-5]\d)$/)) {
       return await interaction.reply({
         content: "Le format de l'heure est incorrect !",
-      })
+      });
     }
 
     const startDate = dayjs(
       dayjs(jour, 'DD/MM/YYYY').toDate().setHours(0, 0, 0, 0),
-    ).toISOString()
+    ).toISOString();
     const endDate = dayjs(
       dayjs(jour, 'DD/MM/YYYY').toDate().setHours(23, 59, 59, 999),
-    ).toISOString()
+    ).toISOString();
 
     const OrderOfTheDay: ORDER_OF_THE_DAY = await OrderOfTheDaySchema.findOne({
       day: {
         $gte: startDate,
         $lte: endDate,
       },
-    }).lean()
+    }).lean();
 
     if (OrderOfTheDay) {
       const isHourAlreadyTaken = OrderOfTheDay.missions.some(mission => {
-        return mission.hour === heure
-      })
+        return mission.hour === heure;
+      });
       if (isHourAlreadyTaken) {
         return await interaction.reply({
           content: "L'heure est déjà prise !",
-        })
+        });
       }
     }
 
-    let updateOrderOfTheDay
+    let updateOrderOfTheDay;
     if (!OrderOfTheDay) {
       updateOrderOfTheDay = await OrderOfTheDaySchema.create({
         day: dayjs(jour, 'DD/MM/YYYY').toDate().setHours(12, 30, 60, 500),
@@ -93,7 +93,7 @@ export const command: SlashCommand = {
             hour: heure,
           },
         ],
-      })
+      });
     } else {
       updateOrderOfTheDay = await OrderOfTheDaySchema.findOneAndUpdate(
         {
@@ -108,11 +108,11 @@ export const command: SlashCommand = {
             },
           },
         },
-      ).lean()
+      ).lean();
     }
 
     interaction.reply({
       content: 'En cours de dev',
-    })
+    });
   },
-}
+};

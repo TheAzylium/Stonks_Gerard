@@ -1,43 +1,43 @@
-import { Modals } from '../../../types'
-import { ModalSubmitInteraction } from 'discord.js'
-import UserSchema, { USER } from '../../../models/UserModel'
-import { sendEmbedMessage } from '../../../slashCommands/rh/hiring'
-import dayjs from 'dayjs'
-dayjs.extend(require('dayjs/plugin/customParseFormat'))
+import { Modals } from '../../../types';
+import { ModalSubmitInteraction } from 'discord.js';
+import UserSchema, { USER } from '../../../models/UserModel';
+import { sendEmbedMessage } from '../../../slashCommands/rh/hiring';
+import dayjs from 'dayjs';
+dayjs.extend(require('dayjs/plugin/customParseFormat'));
 
-const wait = require('node:timers/promises').setTimeout
+const wait = require('node:timers/promises').setTimeout;
 
 export const modals: Modals = {
   data: {
     name: 'edit_pro_user',
   },
   execute: async (interaction: ModalSubmitInteraction) => {
-    const weapon = interaction.fields.getTextInputValue('weapon')
+    const weapon = interaction.fields.getTextInputValue('weapon');
     const hiringDate =
-      interaction.fields.getTextInputValue('hiring-date') || undefined
+      interaction.fields.getTextInputValue('hiring-date') || undefined;
     const lastMedicalVisit =
-      interaction.fields.getTextInputValue('last-medical-visit') || undefined
+      interaction.fields.getTextInputValue('last-medical-visit') || undefined;
     const nextMedicalVisit =
-      interaction.fields.getTextInputValue('next-medical-visit') || undefined
+      interaction.fields.getTextInputValue('next-medical-visit') || undefined;
     // dayjs(, 'DD/MM/YYYY').toDate()
     if (weapon && !weapon.match(/\d{2}/)) {
       return await interaction.reply({
         content: 'Le numéro de matricule doit être au format XX !',
         ephemeral: true,
-      })
+      });
     }
     if (hiringDate && !hiringDate.match(/\d{2}[/]\d{2}[/]\d{4}/)) {
       return await interaction.reply({
         content: "La date d'embauche doit être au format DD/MM/YYYY !",
         ephemeral: true,
-      })
+      });
     }
     if (lastMedicalVisit && !lastMedicalVisit.match(/\d{2}[/]\d{2}[/]\d{4}/)) {
       return await interaction.reply({
         content:
           'La date de la dernière visite médicale doit être au format DD/MM/YYYY !',
         ephemeral: true,
-      })
+      });
     }
 
     if (nextMedicalVisit && !nextMedicalVisit.match(/\d{2}[/]\d{2}[/]\d{4}/)) {
@@ -45,20 +45,20 @@ export const modals: Modals = {
         content:
           'La date de la prochaine visite médicale doit être au format DD/MM/YYYY !',
         ephemeral: true,
-      })
+      });
     }
 
     let hiringDateDated: Date,
       lastMedicalVisitDated: Date,
-      nextMedicalVisitDated: Date
+      nextMedicalVisitDated: Date;
     if (hiringDate) {
-      hiringDateDated = dayjs(hiringDate, 'DD/MM/YYYY').toDate()
+      hiringDateDated = dayjs(hiringDate, 'DD/MM/YYYY').toDate();
     }
     if (lastMedicalVisit) {
-      lastMedicalVisitDated = dayjs(lastMedicalVisit, 'DD/MM/YYYY').toDate()
+      lastMedicalVisitDated = dayjs(lastMedicalVisit, 'DD/MM/YYYY').toDate();
     }
     if (nextMedicalVisit) {
-      nextMedicalVisitDated = dayjs(nextMedicalVisit, 'DD/MM/YYYY').toDate()
+      nextMedicalVisitDated = dayjs(nextMedicalVisit, 'DD/MM/YYYY').toDate();
     }
 
     const user: USER = await UserSchema.findOneAndUpdate(
@@ -71,11 +71,11 @@ export const modals: Modals = {
         updatedBy: interaction.user.id,
       },
       { new: true },
-    ).lean()
+    ).lean();
 
-    const memberUser = await interaction.guild.members.fetch(user.discordId)
+    const memberUser = await interaction.guild.members.fetch(user.discordId);
     const updatedBy = (await interaction.guild.members.fetch(user.updatedBy))
-      .nickname
+      .nickname;
     const newEmbed = await sendEmbedMessage(memberUser.user, {
       name: user.name,
       phone: user.phone,
@@ -93,20 +93,20 @@ export const modals: Modals = {
         ? dayjs(user.next_medical_visit).format('DD/MM/YYYY')
         : ' ',
       updatedBy: updatedBy,
-    })
+    });
 
     const message: any = await interaction.channel.messages.fetch(
       user.embed_message_id,
-    )
-    await message.edit({ embeds: [newEmbed.embed] })
+    );
+    await message.edit({ embeds: [newEmbed.embed] });
 
     await interaction.reply({
       content: 'Les informations personnelles ont été mises à jour !',
       ephemeral: true,
-    })
-    await wait(5000)
-    await interaction.deleteReply()
+    });
+    await wait(5000);
+    await interaction.deleteReply();
   },
-}
+};
 
-export default modals
+export default modals;

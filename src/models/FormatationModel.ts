@@ -1,24 +1,24 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
 export interface FORMATION {
-  _id: string
-  discordId: string
-  messageId: string
+  _id: string;
+  discordId: string;
+  messageId: string;
   role: {
-    _id: string
-    name: string
-  }
+    _id: string;
+    name: string;
+  };
   formations: [
     {
-      _id: string
-      name: string
-      emoji: string
-      date: Date
-      updatedBy: string
+      _id: string;
+      name: string;
+      emoji: string;
+      date: Date;
+      updatedBy: string;
     },
-  ]
-  createAt: Date
-  updatedAt: Date
+  ];
+  createAt: Date;
+  updatedAt: Date;
 }
 
 const FormationSchema = new mongoose.Schema(
@@ -55,6 +55,6 @@ const FormationSchema = new mongoose.Schema(
     ],
   },
   { timestamps: true, versionKey: false },
-)
+);
 
-export default mongoose.model<FORMATION>('Formation', FormationSchema)
+export default mongoose.model<FORMATION>('Formation', FormationSchema);
