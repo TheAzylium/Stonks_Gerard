@@ -55,7 +55,7 @@ export const command: SlashCommand = {
         },
       }).save()
       await interaction.reply({
-        content: 'Le remplissage FFS a bien été déclaré !',
+        content: 'La livraison FFS a bien été déclaré !',
         ephemeral: true,
       })
     } catch (e) {
