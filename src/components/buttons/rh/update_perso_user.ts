@@ -6,18 +6,23 @@ const {
   TextInputStyle,
 } = require('discord.js');
 import UserSchema, { USER } from '../../../models/UserModel';
-require('dayjs');
-const { RH_ROLE_ID, ADMIN_ROLE_ID, HS_ROLE_ID } = process.env;
+import { rolesMap } from '../../../const/rolesManager';
+import { PermissionsBitField } from 'discord.js';
 export const button: Buttons = {
   data: {
     name: 'edit_perso_user',
   },
   execute: async interaction => {
-    const roles = [RH_ROLE_ID, ADMIN_ROLE_ID, HS_ROLE_ID];
+    const roles = [
+      rolesMap.get('rh'),
+      rolesMap.get('administrateur'),
+      rolesMap.get('head_security'),
+    ];
+    const member = interaction.guild.members.cache.get(interaction.user.id);
+
     if (
-      !interaction.guild.members.cache
-        .get(interaction.user.id)
-        .roles.cache.some(role => roles.includes(role.id))
+      !member.permissions.has(PermissionsBitField.Flags.Administrator) &&
+      !member.roles.cache.some(role => roles.includes(role.id))
     ) {
       return await interaction.reply({
         content: "Vous n'avez pas la permission de faire cette commande !",

@@ -6,8 +6,8 @@ import {
 } from 'discord.js';
 
 import ActivityMonitoringSchema from '../../models/MonitoringActivityModel';
-
-const { SUIVI_ACTIVITY_CHANNEL_ID } = process.env;
+import { rolesMap } from '../../const/rolesManager';
+import { channelMap } from '../../const/channelManager';
 
 export const command: SlashCommand = {
   name: 'upw',
@@ -16,8 +16,18 @@ export const command: SlashCommand = {
     .setDescription('Permet de déclarer un remplissage UPW.'),
   execute: async (interaction: CommandInteraction) => {
     try {
+      if (
+        !interaction.guild.members.cache
+          .get(interaction.user.id)
+          .roles.cache.some(role => role.id === rolesMap.get('agent'))
+      ) {
+        return await interaction.reply({
+          content: "Vous n'avez pas la permission de faire cette commande !",
+          ephemeral: true,
+        });
+      }
       const channel = interaction.guild.channels.cache.get(
-        SUIVI_ACTIVITY_CHANNEL_ID,
+        channelMap.get('suivi-activite'),
       ) as TextChannel;
 
       const message = await channel.send(

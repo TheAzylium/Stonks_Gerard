@@ -6,6 +6,7 @@ import RhHistorySchema from '../../../models/RhHistoryModel';
 import dayjs from 'dayjs';
 import { sendEmbedMessage } from '../../../slashCommands/rh/hire';
 import { PoleList } from '../../../const/PolesList';
+import { rolesMap } from '../../../const/rolesManager';
 
 dayjs.extend(require('dayjs/plugin/customParseFormat'));
 
@@ -46,7 +47,7 @@ export const modals: SelectMenu = {
         role => role.id !== interaction.guild.roles.everyone.id,
       ),
     );
-    const roles = [updatedUser.sex, process.env.AGENT_ROLE_ID];
+    const roles = [updatedUser.sex, rolesMap.get('agent')];
 
     if (updatedUser.pole?._id) {
       roles.push(updatedUser.pole._id);

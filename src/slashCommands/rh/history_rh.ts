@@ -1,14 +1,15 @@
 import {
   CommandInteraction,
   EmbedBuilder,
+  PermissionsBitField,
   SlashCommandBuilder,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
 import dayjs from 'dayjs';
 dayjs.extend(require('dayjs/plugin/customParseFormat'));
 import RhHistorySchema, { RHHISTORY } from '../../models/RhHistoryModel';
+import { rolesMap } from '../../const/rolesManager';
 
-const { RH_ROLE_ID, ADMIN_ROLE_ID, HS_ROLE_ID } = process.env;
 export const command: SlashCommand = {
   name: 'historyrh',
   data: new SlashCommandBuilder()
@@ -21,11 +22,16 @@ export const command: SlashCommand = {
         .setRequired(true),
     ),
   execute: async (interaction: CommandInteraction) => {
-    const roles = [RH_ROLE_ID, ADMIN_ROLE_ID, HS_ROLE_ID];
+    const roles = [
+      rolesMap.get('rh'),
+      rolesMap.get('administrateur'),
+      rolesMap.get('head_security'),
+    ];
+    const member = interaction.guild.members.cache.get(interaction.user.id);
+
     if (
-      !interaction.guild.members.cache
-        .get(interaction.user.id)
-        .roles.cache.some(role => roles.includes(role.id))
+      !member.permissions.has(PermissionsBitField.Flags.Administrator) &&
+      !member.roles.cache.some(role => roles.includes(role.id))
     ) {
       return await interaction.reply({
         content: "Vous n'avez pas la permission de faire cette commande !",

@@ -14,17 +14,8 @@ import {
 
 import UserSchema from '../../models/UserModel';
 import RhHistorySchema from '../../models/RhHistoryModel';
-
-const {
-  MAN_ID,
-  WOMAN_ID,
-  AGENT_ROLE_ID,
-  STAGIAIRE_ROLE_ID,
-  RH_CATEGORY_ID,
-  RH_ROLE_ID,
-  ADMIN_ROLE_ID,
-  HS_ROLE_ID,
-} = process.env;
+import { rolesMap } from '../../const/rolesManager';
+import { channelMap } from '../../const/channelManager';
 
 export const command: SlashCommand = {
   name: 'hire',
@@ -43,11 +34,16 @@ export const command: SlashCommand = {
   execute: async (interaction: CommandInteraction) => {
     try {
       // check if the user is an array of role (RH, ADMIN, HS)
-      const roles = [RH_ROLE_ID, ADMIN_ROLE_ID, HS_ROLE_ID];
+      const roles = [
+        rolesMap.get('rh'),
+        rolesMap.get('administrateur'),
+        rolesMap.get('head_security'),
+      ];
+      const member = interaction.guild.members.cache.get(interaction.user.id);
+
       if (
-        !interaction.guild.members.cache
-          .get(interaction.user.id)
-          .roles.cache.some(role => roles.includes(role.id))
+        !member.permissions.has(PermissionsBitField.Flags.Administrator) &&
+        !member.roles.cache.some(role => roles.includes(role.id))
       ) {
         return await interaction.reply({
           content: "Vous n'avez pas la permission de faire cette commande !",
@@ -67,7 +63,9 @@ export const command: SlashCommand = {
         });
       }
       const genderRole = interaction.options.get('sexe').role;
-      if (![MAN_ID, WOMAN_ID].includes(genderRole.id)) {
+      if (
+        ![rolesMap.get('homme'), rolesMap.get('femme')].includes(genderRole.id)
+      ) {
         return await interaction.reply({
           content: 'Le sexe doit être un homme ou une femme !',
           ephemeral: true,
@@ -75,24 +73,37 @@ export const command: SlashCommand = {
       }
       await interaction.guild.members.cache
         .get(memberUser.id)
-        .roles.add([genderRole.id, AGENT_ROLE_ID, STAGIAIRE_ROLE_ID]);
+        .roles.add([
+          genderRole.id,
+          rolesMap.get('agent'),
+          rolesMap.get('formation'),
+        ]);
       const name = (await interaction.guild.members.fetch(memberUser.id))
         .nickname;
       const channelName =
-        genderRole.id === MAN_ID ? `👨•${name}` : `👩•${name}`;
+        genderRole.id === rolesMap.get('homme') ? `👨・${name}` : `👩・${name}`;
       const channel = await interaction.guild.channels.create({
         name: channelName,
         type: ChannelType.GuildText,
-        parent: RH_CATEGORY_ID,
+        parent: channelMap.get('espace_rh'),
         permissionOverwrites: [
           {
             id: interaction.guild.roles.everyone,
             deny: [PermissionsBitField.Flags.ViewChannel],
           },
           { id: memberUser.id, allow: [PermissionsBitField.Flags.ViewChannel] },
-          { id: RH_ROLE_ID, allow: [PermissionsBitField.Flags.ViewChannel] },
-          { id: ADMIN_ROLE_ID, allow: [PermissionsBitField.Flags.ViewChannel] },
-          { id: HS_ROLE_ID, allow: [PermissionsBitField.Flags.ViewChannel] },
+          {
+            id: rolesMap.get('rh'),
+            allow: [PermissionsBitField.Flags.ViewChannel],
+          },
+          {
+            id: rolesMap.get('administrateur'),
+            allow: [PermissionsBitField.Flags.ViewChannel],
+          },
+          {
+            id: rolesMap.get('head_security'),
+            allow: [PermissionsBitField.Flags.ViewChannel],
+          },
         ],
       });
 
@@ -114,7 +125,7 @@ export const command: SlashCommand = {
       await RhHistorySchema.create({
         discordId: memberUser.id,
         newRole: {
-          _id: process.env.STAGIAIRE_ROLE_ID,
+          _id: rolesMap.get('formation'),
           name: 'En Formation',
         },
         updatedBy: updatedBy,
@@ -218,7 +229,6 @@ export async function sendEmbedMessage(
         inline: true,
       },
     )
-    .setThumbnail(memberUser.displayAvatarURL())
     .setColor('#8EFF55')
     .setFooter({ text: `Mis à jour par ${content.updatedBy}` });
 

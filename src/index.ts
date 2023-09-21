@@ -4,8 +4,8 @@ import { readdirSync } from 'fs';
 import { join } from 'path';
 import { Buttons, Modals, SelectMenu, SlashCommand } from './types';
 
-dotenv.config();
-
+const envFile = process.argv[2] === 'test' ? '.env.test' : '.env';
+dotenv.config({ path: envFile });
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,

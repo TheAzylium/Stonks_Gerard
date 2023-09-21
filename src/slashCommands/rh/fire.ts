@@ -1,23 +1,15 @@
 import { SlashCommand } from '../../types';
 import {
-  SlashCommandBuilder,
-  ChannelType,
-  PermissionsBitField,
-  User,
-  EmbedBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  ActionRowBuilder,
-  TextChannel,
   CommandInteraction,
+  PermissionsBitField,
+  SlashCommandBuilder,
 } from 'discord.js';
 
 import UserSchema, { USER } from '../../models/UserModel';
 import RhHistorySchema from '../../models/RhHistoryModel';
 import dayjs from 'dayjs';
 import { sendEmbedMessage } from './hire';
-
-const { RH_ROLE_ID, ADMIN_ROLE_ID, HS_ROLE_ID } = process.env;
+import { rolesMap } from '../../const/rolesManager';
 
 const wait = require('node:timers/promises').setTimeout;
 
@@ -41,11 +33,16 @@ export const command: SlashCommand = {
   execute: async (interaction: CommandInteraction) => {
     try {
       // check if the user is an array of role (RH, ADMIN, HS)
-      const roles = [RH_ROLE_ID, ADMIN_ROLE_ID, HS_ROLE_ID];
+      const roles = [
+        rolesMap.get('rh'),
+        rolesMap.get('administrateur'),
+        rolesMap.get('head_security'),
+      ];
+      const member = interaction.guild.members.cache.get(interaction.user.id);
+
       if (
-        !interaction.guild.members.cache
-          .get(interaction.user.id)
-          .roles.cache.some(role => roles.includes(role.id))
+        !member.permissions.has(PermissionsBitField.Flags.Administrator) &&
+        !member.roles.cache.some(role => roles.includes(role.id))
       ) {
         return await interaction.reply({
           content: "Vous n'avez pas la permission de faire cette commande !",
@@ -75,12 +72,7 @@ export const command: SlashCommand = {
             ),
         );
 
-      const name = (await interaction.guild.members.fetch(memberUser.id))
-        .nickname;
       const updatedBy = interaction.user.id;
-      const nickNameUpdatedBy = (
-        await interaction.guild.members.fetch(updatedBy)
-      ).nickname;
 
       const channelUser: USER = await UserSchema.findOneAndUpdate(
         { discordId: memberUser.id },

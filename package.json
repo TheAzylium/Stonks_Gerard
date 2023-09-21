@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node dist/index.js",
+    "start:test": "node dist/index.js test",
     "lint": "eslint 'src/**/*.{js,ts,tsx}'",
     "lint:fix": "eslint src/**/*.{js,ts,tsx} --fix"
   },
@@ -25,6 +26,7 @@
     "dayjs": "^1.11.9",
     "discord.js": "^14.13.0",
     "dotenv": "^16.3.1",
-    "mongoose": "^7.5.0"
+    "mongoose": "^7.5.0",
+    "slugify": "^1.6.6"
   }
 }

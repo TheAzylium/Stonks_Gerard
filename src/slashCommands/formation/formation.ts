@@ -9,8 +9,8 @@ import {
 } from 'discord.js';
 
 import FormationSchema, { FORMATION } from '../../models/FormatationModel';
-
-const { FORMATION_CHANNEL_ID, STAGIAIRE_ROLE_ID } = process.env;
+import { channelMap } from '../../const/channelManager';
+import { rolesMap } from '../../const/rolesManager';
 
 export const command: SlashCommand = {
   name: 'formation',
@@ -53,7 +53,9 @@ export const command: SlashCommand = {
         .lean();
       if (targetUser) {
         const guildId = interaction.guildId;
-        const linkToMessage = `https://discord.com/channels/${guildId}/${FORMATION_CHANNEL_ID}/${targetUser.messageId}`;
+        const linkToMessage = `https://discord.com/channels/${guildId}/${channelMap.get(
+          'suivi-formation',
+        )}/${targetUser.messageId}`;
         // Dire que le membre est déjà dans la base de donnée avec le lien du message avec messageId
         return await interaction.reply({
           content:
@@ -85,7 +87,7 @@ export const command: SlashCommand = {
 
         const message = await (
           interaction.guild.channels.cache.get(
-            FORMATION_CHANNEL_ID,
+            channelMap.get('suivi-formation'),
           ) as TextChannel
         ).send({
           content: `__En formation__ :  **${nicknameTarget}** ♦${phone}♦`,
@@ -96,7 +98,7 @@ export const command: SlashCommand = {
           discordId: target.id,
           messageId: message.id,
           role: {
-            _id: STAGIAIRE_ROLE_ID,
+            _id: rolesMap.get('formation'),
             name: 'En formation',
           },
           formations: [],
