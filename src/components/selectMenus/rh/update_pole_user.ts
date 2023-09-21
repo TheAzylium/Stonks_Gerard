@@ -4,7 +4,7 @@ import UserSchema, { USER } from '../../../models/UserModel';
 import RhHistorySchema from '../../../models/RhHistoryModel';
 
 import dayjs from 'dayjs';
-import { sendEmbedMessage } from '../../../slashCommands/rh/hiring';
+import { sendEmbedMessage } from '../../../slashCommands/rh/hire';
 import { PoleList } from '../../../const/PolesList';
 
 dayjs.extend(require('dayjs/plugin/customParseFormat'));

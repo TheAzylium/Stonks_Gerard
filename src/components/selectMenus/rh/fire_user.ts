@@ -3,7 +3,7 @@ import { PermissionsBitField, StringSelectMenuInteraction } from 'discord.js';
 import UserSchema, { USER } from '../../../models/UserModel';
 import RhHistorySchema from '../../../models/RhHistoryModel';
 import dayjs from 'dayjs';
-import { sendEmbedMessage } from '../../../slashCommands/rh/hiring';
+import { sendEmbedMessage } from '../../../slashCommands/rh/hire';
 dayjs.extend(require('dayjs/plugin/customParseFormat'));
 
 const wait = require('node:timers/promises').setTimeout;

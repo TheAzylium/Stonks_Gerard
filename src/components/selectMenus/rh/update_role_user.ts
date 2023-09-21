@@ -5,7 +5,7 @@ import RhHistorySchema from '../../../models/RhHistoryModel';
 
 import dayjs from 'dayjs';
 import { PosteList } from '../../../const/RolesList';
-import { sendEmbedMessage } from '../../../slashCommands/rh/hiring';
+import { sendEmbedMessage } from '../../../slashCommands/rh/hire';
 dayjs.extend(require('dayjs/plugin/customParseFormat'));
 
 const wait = require('node:timers/promises').setTimeout;

@@ -27,9 +27,9 @@ const {
 } = process.env;
 
 export const command: SlashCommand = {
-  name: 'hiring',
+  name: 'hire',
   data: new SlashCommandBuilder()
-    .setName('hiring')
+    .setName('hire')
     .setDescription('Permet de recruter le mec @ et créer son espace RH.')
     .addUserOption(option =>
       option
@@ -55,6 +55,17 @@ export const command: SlashCommand = {
         });
       }
       const memberUser: User = interaction.options.getUser('membre');
+      const checkUserAlreadyExist = await UserSchema.findOne({
+        discordId: memberUser.id,
+      })
+        .select('_id')
+        .lean();
+      if (checkUserAlreadyExist) {
+        return await interaction.reply({
+          content: 'Cet utilisateur existe déjà !',
+          ephemeral: true,
+        });
+      }
       const genderRole = interaction.options.get('sexe').role;
       if (![MAN_ID, WOMAN_ID].includes(genderRole.id)) {
         return await interaction.reply({
@@ -228,10 +239,6 @@ export async function sendEmbedMessage(
       .setStyle(ButtonStyle.Secondary)
       .setLabel('Modifier le pole')
       .setCustomId('edit_pole_user'),
-    new ButtonBuilder()
-      .setStyle(ButtonStyle.Danger)
-      .setLabel('Licencier')
-      .setCustomId('fire_user'),
   );
   return { embed, row };
 }
