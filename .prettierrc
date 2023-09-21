@@ -6,6 +6,6 @@
   "useTabs": false,
   "trailingComma": "all",
   "arrowParens": "avoid",
-  "quoteProps": "consistent",
+  "quoteProps": "consistent"
 
 }

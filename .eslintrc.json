@@ -10,7 +10,9 @@
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-var-requires": "off",
         "quotes": ["error", "single", { "allowTemplateLiterals": true, "avoidEscape": true }],
-        "prettier/prettier": "error"
+        "prettier/prettier": "error",
+        "semi": "off",
+        "@typescript-eslint/semi": ["error", "always"]
     },
     "settings": {
         "import/parsers": {
