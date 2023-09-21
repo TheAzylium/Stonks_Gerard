@@ -16,7 +16,7 @@ export const PosteList = [
     value: process.env.SENIOR_ROLE_ID,
   },
   {
-    label: 'Chef d\'équipe',
+    label: "Chef d'équipe",
     value: process.env.CHEF_ROLE_ID,
   },
   {
@@ -27,4 +27,4 @@ export const PosteList = [
     label: 'Head Security',
     value: process.env.HS_ROLE_ID,
   },
-];
+]

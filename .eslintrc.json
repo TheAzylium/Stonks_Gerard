@@ -1,15 +1,16 @@
 {
-    "parser": "@typescript-eslint/parser",
     "extends": [
-        "plugin:@typescript-eslint/recommended"
+        "plugin:@typescript-eslint/recommended",
+        "plugin:prettier/recommended"
     ],
-    "plugins": ["@typescript-eslint"],
+    "plugins": ["@typescript-eslint", "prettier"],
     "rules": {
         "@typescript-eslint/explicit-function-return-type": "off",
         "prefer-const": "error",
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-var-requires": "off",
-        "quotes": ["error", "single", { "allowTemplateLiterals": true }]
+        "quotes": ["error", "single", { "allowTemplateLiterals": true, "avoidEscape": true }],
+        "prettier/prettier": "error"
     },
     "settings": {
         "import/parsers": {

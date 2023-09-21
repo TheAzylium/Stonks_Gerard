@@ -1,5 +1,5 @@
-import { BotEvent } from '../types';
-import { Events, Interaction, InteractionType } from 'discord.js';
+import { BotEvent } from '../types'
+import { Events, Interaction, InteractionType } from 'discord.js'
 
 const event: BotEvent = {
   name: Events.InteractionCreate,
@@ -8,27 +8,27 @@ const event: BotEvent = {
     if (interaction.isChatInputCommand()) {
       const commands = interaction.client.slashCommands.get(
         interaction.commandName,
-      );
+      )
 
-      if (!commands) return;
+      if (!commands) return
 
-      await commands.execute(interaction);
+      await commands.execute(interaction)
     } else if (interaction.isButton()) {
-      const buttons = interaction.client.buttons.get(interaction.customId);
-      if (!buttons) return;
-      await buttons.execute(interaction);
+      const buttons = interaction.client.buttons.get(interaction.customId)
+      if (!buttons) return
+      await buttons.execute(interaction)
     } else if (interaction.type === InteractionType.ModalSubmit) {
-      const { modals } = interaction.client;
-      const modal = modals.get(interaction.customId);
-      if (!modal) return;
-      await modal.execute(interaction);
+      const { modals } = interaction.client
+      const modal = modals.get(interaction.customId)
+      if (!modal) return
+      await modal.execute(interaction)
     } else if (interaction.isStringSelectMenu()) {
-      const { selectMenus } = interaction.client;
-      const selectMenu = selectMenus.get(interaction.customId);
-      if (!selectMenu) return;
-      await selectMenu.execute(interaction);
+      const { selectMenus } = interaction.client
+      const selectMenu = selectMenus.get(interaction.customId)
+      if (!selectMenu) return
+      await selectMenu.execute(interaction)
     }
   },
-};
+}
 
-export default event;
+export default event

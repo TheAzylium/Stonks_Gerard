@@ -1,29 +1,29 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
 export interface USER {
-  discordId: string;
-  rh_channel: string;
-  embed_message_id: string;
-  name: string;
-  phone: string;
-  hiringDate: Date;
-  accountNumber: string;
+  discordId: string
+  rh_channel: string
+  embed_message_id: string
+  name: string
+  phone: string
+  hiringDate: Date
+  accountNumber: string
   role: {
-    _id: string;
-    name: string;
-  };
+    _id: string
+    name: string
+  }
   pole: {
-    _id: string;
-    name: string;
-  };
-  sex: string;
-  number_weapon: number;
-  last_medical_visit: Date;
-  next_medical_visit: Date;
-  updatedAt: Date;
-  createdAt: Date;
-  isDeleted: false;
-  updatedBy: string;
+    _id: string
+    name: string
+  }
+  sex: string
+  number_weapon: number
+  last_medical_visit: Date
+  next_medical_visit: Date
+  updatedAt: Date
+  createdAt: Date
+  isDeleted: false
+  updatedBy: string
 }
 
 const UserSchema = new mongoose.Schema(
@@ -86,6 +86,6 @@ const UserSchema = new mongoose.Schema(
     },
   },
   { versionKey: false, timestamps: true },
-);
+)
 
-export default mongoose.models.User || mongoose.model('User', UserSchema);
+export default mongoose.models.User || mongoose.model('User', UserSchema)

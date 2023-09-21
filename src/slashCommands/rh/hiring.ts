@@ -1,4 +1,4 @@
-import { SlashCommand } from '../../types';
+import { SlashCommand } from '../../types'
 import {
   SlashCommandBuilder,
   ChannelType,
@@ -10,10 +10,10 @@ import {
   ActionRowBuilder,
   TextChannel,
   CommandInteraction,
-} from 'discord.js';
+} from 'discord.js'
 
-import UserSchema from '../../models/UserModel';
-import RhHistorySchema from '../../models/RhHistoryModel';
+import UserSchema from '../../models/UserModel'
+import RhHistorySchema from '../../models/RhHistoryModel'
 
 const {
   MAN_ID,
@@ -24,51 +24,50 @@ const {
   RH_ROLE_ID,
   ADMIN_ROLE_ID,
   HS_ROLE_ID,
-} = process.env;
+} = process.env
 
 export const command: SlashCommand = {
   name: 'hiring',
   data: new SlashCommandBuilder()
     .setName('hiring')
     .setDescription('Permet de recruter le mec @ et créer son espace RH.')
-    .addUserOption((option) =>
+    .addUserOption(option =>
       option
         .setName('membre')
         .setDescription('Membre à recruter')
         .setRequired(true),
     )
-    .addRoleOption((option) =>
+    .addRoleOption(option =>
       option.setName('sexe').setDescription('Sexe du membre').setRequired(true),
     ),
   execute: async (interaction: CommandInteraction) => {
     try {
       // check if the user is an array of role (RH, ADMIN, HS)
-      const roles = [RH_ROLE_ID, ADMIN_ROLE_ID, HS_ROLE_ID];
+      const roles = [RH_ROLE_ID, ADMIN_ROLE_ID, HS_ROLE_ID]
       if (
         !interaction.guild.members.cache
           .get(interaction.user.id)
-          .roles.cache.some((role) => roles.includes(role.id))
+          .roles.cache.some(role => roles.includes(role.id))
       ) {
         return await interaction.reply({
-          content: 'Vous n\'avez pas la permission de faire cette commande !',
+          content: "Vous n'avez pas la permission de faire cette commande !",
           ephemeral: true,
-        });
+        })
       }
-      const memberUser: User = interaction.options.getUser('membre');
-      const genderRole = interaction.options.get('sexe').role;
+      const memberUser: User = interaction.options.getUser('membre')
+      const genderRole = interaction.options.get('sexe').role
       if (![MAN_ID, WOMAN_ID].includes(genderRole.id)) {
         return await interaction.reply({
           content: 'Le sexe doit être un homme ou une femme !',
           ephemeral: true,
-        });
+        })
       }
       await interaction.guild.members.cache
         .get(memberUser.id)
-        .roles.add([genderRole.id, AGENT_ROLE_ID, STAGIAIRE_ROLE_ID]);
+        .roles.add([genderRole.id, AGENT_ROLE_ID, STAGIAIRE_ROLE_ID])
       const name = (await interaction.guild.members.fetch(memberUser.id))
-        .nickname;
-      const channelName =
-        genderRole.id === MAN_ID ? `👨•${name}` : `👩•${name}`;
+        .nickname
+      const channelName = genderRole.id === MAN_ID ? `👨•${name}` : `👩•${name}`
       const channel = await interaction.guild.channels.create({
         name: channelName,
         type: ChannelType.GuildText,
@@ -83,22 +82,22 @@ export const command: SlashCommand = {
           { id: ADMIN_ROLE_ID, allow: [PermissionsBitField.Flags.ViewChannel] },
           { id: HS_ROLE_ID, allow: [PermissionsBitField.Flags.ViewChannel] },
         ],
-      });
+      })
 
-      const updatedBy = interaction.user.id;
+      const updatedBy = interaction.user.id
       const nickNameUpdatedBy = (
         await interaction.guild.members.fetch(updatedBy)
-      ).nickname;
+      ).nickname
 
       const embed = await sendEmbedMessage(memberUser, {
         name: name,
         updatedBy: nickNameUpdatedBy,
-      });
+      })
       const sentMessage = await channel.send({
         embeds: [embed.embed],
         components: [embed.row],
-      });
-      const embedId = sentMessage.id;
+      })
+      const embedId = sentMessage.id
 
       await RhHistorySchema.create({
         discordId: memberUser.id,
@@ -107,7 +106,7 @@ export const command: SlashCommand = {
           name: 'En Formation',
         },
         updatedBy: updatedBy,
-      });
+      })
 
       await createUserSchema(
         memberUser,
@@ -116,20 +115,20 @@ export const command: SlashCommand = {
         embedId,
         genderRole.id,
         interaction.user.id,
-      );
+      )
 
       await interaction.reply({
         content: `Le channel ${channel} a été créé !`,
-      });
+      })
     } catch (e) {
-      console.error(e);
+      console.error(e)
       await interaction.reply({
         content: 'An error occurred while processing the command.',
         ephemeral: true,
-      });
+      })
     }
   },
-};
+}
 
 async function createUserSchema(
   memberUser: User,
@@ -156,22 +155,22 @@ async function createUserSchema(
     number_weapon: undefined,
     last_medical_visit: undefined,
     updatedBy: createdBy,
-  });
+  })
 }
 
 export async function sendEmbedMessage(
   memberUser: User,
   content: {
-    name?: string;
-    phone?: string;
-    hiringDate?: string;
-    accountNumber?: string;
-    role?: string;
-    pole?: string;
-    number_weapon?: string;
-    lastMedicalVisit?: string;
-    nextMedicalVisit?: string;
-    updatedBy?: string;
+    name?: string
+    phone?: string
+    hiringDate?: string
+    accountNumber?: string
+    role?: string
+    pole?: string
+    number_weapon?: string
+    lastMedicalVisit?: string
+    nextMedicalVisit?: string
+    updatedBy?: string
   } = {
     name: ' ',
     phone: ' ',
@@ -209,7 +208,7 @@ export async function sendEmbedMessage(
     )
     .setThumbnail(memberUser.displayAvatarURL())
     .setColor('#8EFF55')
-    .setFooter({ text: `Mis à jour par ${content.updatedBy}` });
+    .setFooter({ text: `Mis à jour par ${content.updatedBy}` })
 
   const row: any = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
@@ -232,6 +231,6 @@ export async function sendEmbedMessage(
       .setStyle(ButtonStyle.Danger)
       .setLabel('Licencier')
       .setCustomId('fire_user'),
-  );
-  return { embed, row };
+  )
+  return { embed, row }
 }

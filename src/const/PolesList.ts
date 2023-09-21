@@ -15,4 +15,4 @@ export const PoleList = [
     label: 'Commercial',
     value: process.env.COMMERCIAL_ROLE_ID,
   },
-];
+]
