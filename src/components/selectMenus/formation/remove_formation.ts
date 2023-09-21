@@ -9,20 +9,12 @@ const wait = require('node:timers/promises').setTimeout;
 
 export const modals: SelectMenu = {
   data: {
-    name: 'add_formation',
+    name: 'remove_formation',
   },
   execute: async (interaction: StringSelectMenuInteraction) => {
-    const newFormation: {
-      _id: string;
-      name: string;
-      emoji: string;
-      date: Date;
-      updatedBy: string;
-    } = {
-      ...Formation.find(option => option._id === interaction.values[0]),
-      updatedBy: interaction.user.id,
-      date: new Date(),
-    };
+    const formationToRemove = Formation.find(
+      formation => formation._id === interaction.values[0],
+    );
 
     const messageId = interaction.message.reference.messageId;
     const userFormationMessage: FORMATION = await FormationSchema.findOne({
@@ -31,10 +23,12 @@ export const modals: SelectMenu = {
     if (userFormationMessage) {
       const updatedUserFormation: FORMATION =
         await FormationSchema.findOneAndUpdate(
-          { _id: userFormationMessage._id },
+          { messageId: messageId },
           {
-            $push: {
-              formations: newFormation,
+            $pull: {
+              formations: {
+                _id: formationToRemove._id,
+              },
             },
           },
           { new: true },
@@ -95,7 +89,7 @@ export const modals: SelectMenu = {
         }
       }
       await interaction.reply({
-        content: 'Formation ajoutée',
+        content: 'Formation supprimé',
         ephemeral: true,
       });
       await wait(5000);
