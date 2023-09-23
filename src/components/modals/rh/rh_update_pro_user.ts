@@ -96,7 +96,7 @@ export const modals: Modals = {
     });
 
     const message: any = await interaction.channel.messages.fetch(
-      user.embed_message_id,
+      user.embed_message_id_rh,
     );
     await message.edit({ embeds: [newEmbed.embed] });
 

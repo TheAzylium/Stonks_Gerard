@@ -51,6 +51,9 @@ export const command: SlashCommand = {
         });
       }
       const memberUser: User = interaction.options.getUser('membre');
+      const nicknameTarget = (
+        await interaction.guild.members.fetch(memberUser.id)
+      ).nickname;
       const checkUserAlreadyExist = await UserSchema.findOne({
         discordId: memberUser.id,
       })
@@ -131,14 +134,35 @@ export const command: SlashCommand = {
         updatedBy: updatedBy,
       });
 
-      await createUserSchema(
+      const row: ActionRowBuilder = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId('add_formation')
+          .setLabel('Ajouter une formation')
+          .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+          .setCustomId('remove_formation')
+          .setLabel('Retirer une formation')
+          .setStyle(ButtonStyle.Danger),
+      );
+
+      const message = await (
+        interaction.guild.channels.cache.get(
+          channelMap.get('suivi-formation'),
+        ) as TextChannel
+      ).send({
+        content: `__En formation__ :  **${nicknameTarget}** ♦555-XXXX♦`,
+        components: [row as any],
+      });
+
+      await createUserSchema({
         memberUser,
         channel,
         name,
-        embedId,
-        genderRole.id,
-        interaction.user.id,
-      );
+        embedId: embedId,
+        sex: genderRole.id,
+        messageId: message.id,
+        createdBy: interaction.user.id,
+      });
 
       await interaction.reply({
         content: `Le channel ${channel} a été créé !`,
@@ -153,23 +177,28 @@ export const command: SlashCommand = {
   },
 };
 
-async function createUserSchema(
-  memberUser: User,
-  channel: TextChannel,
-  name: string,
-  embedId: string,
-  sex: string,
-  createdBy?: string,
-) {
+async function createUserSchema({
+  memberUser,
+  channel,
+  name,
+  embedId,
+  sex,
+  messageId,
+  createdBy,
+}) {
   return await UserSchema.create({
     discordId: memberUser.id,
     rh_channel: channel.id,
-    embed_message_id: embedId,
+    embed_message_id_rh: embedId,
+    message_id_formation: messageId,
     name: name,
     phone: undefined,
     hiringDate: undefined,
     accountNumber: undefined,
-    role: undefined,
+    role: {
+      _id: rolesMap.get('formation'),
+      name: 'Formation',
+    },
     sex: sex,
     pole: {
       _id: undefined,
@@ -178,6 +207,7 @@ async function createUserSchema(
     number_weapon: undefined,
     last_medical_visit: undefined,
     updatedBy: createdBy,
+    formations: [],
   });
 }
 

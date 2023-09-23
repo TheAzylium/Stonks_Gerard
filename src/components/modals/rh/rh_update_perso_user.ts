@@ -1,8 +1,9 @@
 import { Modals } from '../../../types';
-import { ModalSubmitInteraction } from 'discord.js';
+import { ModalSubmitInteraction, TextChannel } from 'discord.js';
 import UserSchema, { USER } from '../../../models/UserModel';
 import { sendEmbedMessage } from '../../../slashCommands/rh/hire';
 import dayjs from 'dayjs';
+import { channelMap } from '../../../const/channelManager';
 const wait = require('node:timers/promises').setTimeout;
 
 export const modals: Modals = {
@@ -44,6 +45,22 @@ export const modals: Modals = {
     const updatedBy = (await interaction.guild.members.fetch(user.updatedBy))
       .nickname;
 
+    if (user.phone) {
+      const previousMessageFormation =
+        await interaction.guild.channels.cache.get(
+          channelMap.get('suivi-formation'),
+        );
+
+      if (previousMessageFormation.isTextBased) {
+        const previousMessage = await (
+          previousMessageFormation as TextChannel
+        ).messages.fetch(user.message_id_formation);
+        await previousMessage.edit({
+          content: `__${user.role.name}__ :  **${memberUser.nickname}** ♦${user.phone}♦`,
+        });
+      }
+    }
+
     const newEmbed = await sendEmbedMessage(memberUser.user, {
       name: user.name,
       phone: user.phone,
@@ -63,7 +80,7 @@ export const modals: Modals = {
       updatedBy: updatedBy,
     });
     const message: any = await interaction.channel.messages.fetch(
-      user.embed_message_id,
+      user.embed_message_id_rh,
     );
     await message.edit({ embeds: [newEmbed.embed] });
 

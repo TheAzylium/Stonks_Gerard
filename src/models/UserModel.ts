@@ -1,9 +1,11 @@
 import mongoose from 'mongoose';
 
 export interface USER {
+  _id: string;
   discordId: string;
   rh_channel: string;
-  embed_message_id: string;
+  embed_message_id_rh: string;
+  message_id_formation: string;
   name: string;
   phone: string;
   hiringDate: Date;
@@ -24,6 +26,15 @@ export interface USER {
   createdAt: Date;
   isDeleted: false;
   updatedBy: string;
+  formations: [
+    {
+      _id: string;
+      name: string;
+      emoji: string;
+      date: Date;
+      updatedBy: string;
+    },
+  ];
 }
 
 const UserSchema = new mongoose.Schema(
@@ -34,7 +45,10 @@ const UserSchema = new mongoose.Schema(
     rh_channel: {
       type: String,
     },
-    embed_message_id: {
+    embed_message_id_rh: {
+      type: String,
+    },
+    message_id_formation: {
       type: String,
     },
     name: {
@@ -84,6 +98,22 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    formations: [
+      {
+        _id: {
+          type: String,
+        },
+        name: {
+          type: String,
+        },
+        date: {
+          type: Date,
+        },
+        updatedBy: {
+          type: String,
+        },
+      },
+    ],
   },
   { versionKey: false, timestamps: true },
 );

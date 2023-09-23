@@ -3,6 +3,7 @@ import {
   CommandInteraction,
   PermissionsBitField,
   SlashCommandBuilder,
+  TextChannel,
 } from 'discord.js';
 
 import UserSchema, { USER } from '../../models/UserModel';
@@ -10,6 +11,7 @@ import RhHistorySchema from '../../models/RhHistoryModel';
 import dayjs from 'dayjs';
 import { sendEmbedMessage } from './hire';
 import { rolesMap } from '../../const/rolesManager';
+import { channelMap } from '../../const/channelManager';
 
 const wait = require('node:timers/promises').setTimeout;
 
@@ -73,12 +75,15 @@ export const command: SlashCommand = {
         );
 
       const updatedBy = interaction.user.id;
+      const updatedByNickname = (
+        await interaction.guild.members.fetch(updatedBy)
+      ).nickname;
 
       const channelUser: USER = await UserSchema.findOneAndUpdate(
         { discordId: memberUser.id },
         {
           isDeleted: true,
-          updatedBy,
+          updatedBy: updatedByNickname,
         },
         { new: true },
       ).lean();
@@ -110,7 +115,7 @@ export const command: SlashCommand = {
         nextMedicalVisit: channelUser.next_medical_visit
           ? dayjs(channelUser.next_medical_visit).format('DD/MM/YYYY')
           : ' ',
-        updatedBy: updatedBy,
+        updatedBy: updatedByNickname,
       });
 
       // const sentMessage = await channel.send({
@@ -125,14 +130,26 @@ export const command: SlashCommand = {
           _id: undefined,
           name: 'Licencié',
         },
-        updatedBy: updatedBy,
+        updatedBy: updatedByNickname,
       });
 
       let message;
       if (findChannel.isTextBased()) {
         message = await findChannel.messages.fetch(
-          channelUser.embed_message_id,
+          channelUser.embed_message_id_rh,
         );
+      }
+
+      const previousMessageFormation =
+        await interaction.guild.channels.cache.get(
+          channelMap.get('suivi-formation'),
+        );
+
+      if (previousMessageFormation.isTextBased) {
+        const previousMessage = await (
+          previousMessageFormation as TextChannel
+        ).messages.fetch(channelUser.message_id_formation);
+        await previousMessage.delete();
       }
 
       await message.edit({ embeds: [newEmbed.embed] });

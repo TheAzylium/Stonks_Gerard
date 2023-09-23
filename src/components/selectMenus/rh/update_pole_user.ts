@@ -87,7 +87,7 @@ export const modals: SelectMenu = {
     });
 
     const message: any = await interaction.channel.messages.fetch(
-      updatedUser.embed_message_id,
+      updatedUser.embed_message_id_rh,
     );
     await message.edit({ embeds: [newEmbed.embed] });
 

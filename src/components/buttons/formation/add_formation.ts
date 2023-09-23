@@ -1,6 +1,7 @@
 import { Buttons } from '../../../types';
 import { PermissionsBitField, StringSelectMenuBuilder } from 'discord.js';
-import FormationSchema, { FORMATION } from '../../../models/FormatationModel';
+import UserSchema, { USER } from '../../../models/UserModel';
+
 import { Formation } from '../../../const/Formation';
 import { ActionRowBuilder } from 'discord.js';
 import { rolesMap } from '../../../const/rolesManager';
@@ -29,8 +30,8 @@ export const button: Buttons = {
     }
     const messageId = interaction.message.id;
 
-    const formationUser: FORMATION = await FormationSchema.findOne({
-      messageId: messageId,
+    const formationUser: USER = await UserSchema.findOne({
+      message_id_formation: messageId,
     }).lean();
     if (formationUser) {
       const completedFormationIds = formationUser.formations.map(f => f._id);

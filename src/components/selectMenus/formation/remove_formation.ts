@@ -2,7 +2,7 @@ import { SelectMenu } from '../../../types';
 import { StringSelectMenuInteraction } from 'discord.js';
 import dayjs from 'dayjs';
 import { Formation } from '../../../const/Formation';
-import FormationSchema, { FORMATION } from '../../../models/FormatationModel';
+import UserSchema, { USER } from '../../../models/UserModel';
 dayjs.extend(require('dayjs/plugin/customParseFormat'));
 
 const wait = require('node:timers/promises').setTimeout;
@@ -17,22 +17,21 @@ export const modals: SelectMenu = {
     );
 
     const messageId = interaction.message.reference.messageId;
-    const userFormationMessage: FORMATION = await FormationSchema.findOne({
-      messageId: messageId,
+    const userFormationMessage: USER = await UserSchema.findOne({
+      message_id_formation: messageId,
     }).lean();
     if (userFormationMessage) {
-      const updatedUserFormation: FORMATION =
-        await FormationSchema.findOneAndUpdate(
-          { messageId: messageId },
-          {
-            $pull: {
-              formations: {
-                _id: formationToRemove._id,
-              },
+      const updatedUserFormation: USER = await UserSchema.findOneAndUpdate(
+        { messageId: messageId },
+        {
+          $pull: {
+            formations: {
+              _id: formationToRemove._id,
             },
           },
-          { new: true },
-        ).lean();
+        },
+        { new: true },
+      ).lean();
       const messageToUpdate =
         await interaction.channel.messages.fetch(messageId);
       await messageToUpdate.reactions.removeAll();

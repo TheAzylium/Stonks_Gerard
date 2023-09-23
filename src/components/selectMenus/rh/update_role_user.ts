@@ -1,5 +1,5 @@
 import { SelectMenu } from '../../../types';
-import { StringSelectMenuInteraction } from 'discord.js';
+import { StringSelectMenuInteraction, TextChannel } from 'discord.js';
 import UserSchema, { USER } from '../../../models/UserModel';
 import RhHistorySchema from '../../../models/RhHistoryModel';
 
@@ -7,6 +7,7 @@ import dayjs from 'dayjs';
 import { PosteList } from '../../../const/RolesList';
 import { sendEmbedMessage } from '../../../slashCommands/rh/hire';
 import { rolesMap } from '../../../const/rolesManager';
+import { channelMap } from '../../../const/channelManager';
 dayjs.extend(require('dayjs/plugin/customParseFormat'));
 
 const wait = require('node:timers/promises').setTimeout;
@@ -79,9 +80,26 @@ export const modals: SelectMenu = {
     });
 
     const message: any = await interaction.channel.messages.fetch(
-      updatedUser.embed_message_id,
+      updatedUser.embed_message_id_rh,
     );
     await message.edit({ embeds: [newEmbed.embed] });
+
+    const previousMessageFormation = await interaction.guild.channels.cache.get(
+      channelMap.get('suivi-formation'),
+    );
+
+    if (previousMessageFormation.isTextBased) {
+      const messageFormation: any = await (
+        previousMessageFormation as TextChannel
+      ).messages.fetch(updatedUser.message_id_formation);
+
+      const oldContentMessage = messageFormation.content;
+      const lastPart = oldContentMessage.split(':').pop();
+
+      await messageFormation.edit({
+        content: `__${newRole.name}__ :${lastPart}`,
+      });
+    }
 
     await interaction.reply({
       content: 'Le poste à été mis à jour !',
