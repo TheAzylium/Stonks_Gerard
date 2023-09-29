@@ -22,7 +22,7 @@ export const modals: SelectMenu = {
     }).lean();
     if (userFormationMessage) {
       const updatedUserFormation: USER = await UserSchema.findOneAndUpdate(
-        { messageId: messageId },
+        { message_id_formation: messageId },
         {
           $pull: {
             formations: {

@@ -10,12 +10,15 @@ import {
   ActionRowBuilder,
   TextChannel,
   CommandInteraction,
+  AttachmentBuilder,
+  StringSelectMenuBuilder,
 } from 'discord.js';
 
 import UserSchema from '../../models/UserModel';
 import RhHistorySchema from '../../models/RhHistoryModel';
 import { rolesMap } from '../../const/rolesManager';
 import { channelMap } from '../../const/channelManager';
+import dayjs from 'dayjs';
 
 export const command: SlashCommand = {
   name: 'hire',
@@ -115,15 +118,42 @@ export const command: SlashCommand = {
         await interaction.guild.members.fetch(updatedBy)
       ).nickname;
 
-      const embed = await sendEmbedMessage(memberUser, {
+      const embedClassic = await sendEmbedMessage(memberUser, {
         name: name,
         updatedBy: nickNameUpdatedBy,
       });
-      const sentMessage = await channel.send({
-        embeds: [embed.embed],
-        components: [embed.row],
+
+      const embedMedialVisit = new EmbedBuilder()
+        .setTitle('Visite médicale')
+        .setColor('#8EFF55')
+        .addFields(
+          {
+            name: 'Dernière visite médicale',
+            value: ' ',
+            inline: true,
+          },
+          {
+            name: 'Prochaine visite médicale',
+            value: ' ',
+            inline: true,
+          },
+        )
+        .setFooter({
+          text: `Mis à jour par ${nickNameUpdatedBy} le ${dayjs(
+            new Date(),
+          ).format('DD/MM/YYYY à HH:mm')}`,
+        });
+
+      const hireImage = new AttachmentBuilder('src/assets/hire.png');
+      await channel.send({
+        files: [hireImage],
       });
-      const embedId = sentMessage.id;
+      const sentMessageClassic = await channel.send({
+        embeds: [embedClassic.embed, embedMedialVisit],
+        components: [embedClassic.selecRow],
+      });
+
+      const embedClassicId = sentMessageClassic.id;
 
       await RhHistorySchema.create({
         discordId: memberUser.id,
@@ -150,7 +180,7 @@ export const command: SlashCommand = {
           channelMap.get('suivi-formation'),
         ) as TextChannel
       ).send({
-        content: `__En formation__ :  **${nicknameTarget}** ♦555-XXXX♦`,
+        content: `__En formation__ :  **${nicknameTarget}** 📞555-XXXX📞`,
         components: [row as any],
       });
 
@@ -158,7 +188,7 @@ export const command: SlashCommand = {
         memberUser,
         channel,
         name,
-        embedId: embedId,
+        embedId: embedClassicId,
         sex: genderRole.id,
         messageId: message.id,
         createdBy: interaction.user.id,
@@ -221,9 +251,10 @@ export async function sendEmbedMessage(
     role?: string;
     pole?: string;
     number_weapon?: string;
-    lastMedicalVisit?: string;
-    nextMedicalVisit?: string;
+    // lastMedicalVisit?: string;
+    // nextMedicalVisit?: string;
     updatedBy?: string;
+    updatedAt?: Date;
   } = {
     name: ' ',
     phone: ' ',
@@ -232,13 +263,11 @@ export async function sendEmbedMessage(
     role: ' ',
     pole: ' ',
     number_weapon: ' ',
-    lastMedicalVisit: ' ',
-    nextMedicalVisit: ' ',
     updatedBy: ' ',
+    updatedAt: new Date(),
   },
 ) {
   const embed = new EmbedBuilder()
-    .setAuthor({ name: 'Gerard' })
     .setTitle('Bienvenue dans ton espace RH !')
     .addFields(
       { name: 'Nom', value: content.name || ' ', inline: true },
@@ -248,28 +277,51 @@ export async function sendEmbedMessage(
       { name: 'Poste', value: content.role || ' ' },
       { name: 'Pôle ', value: content.pole || ' ' },
       { name: 'Matricule arme', value: content.number_weapon || ' ' },
-      {
-        name: 'Dernière visite médicale',
-        value: content.lastMedicalVisit || ' ',
-        inline: true,
-      },
-      {
-        name: 'Prochaine visite médicale',
-        value: content.nextMedicalVisit || ' ',
-        inline: true,
-      },
     )
     .setColor('#8EFF55')
-    .setFooter({ text: `Mis à jour par ${content.updatedBy}` });
+    .setFooter({
+      text: `Mis à jour par ${content.updatedBy} le ${dayjs(
+        content.updatedAt,
+      ).format('DD/MM/YYYY à HH:mm')}`,
+    });
+
+  const selectMenu = new StringSelectMenuBuilder()
+    .setCustomId('user_action')
+    .setMaxValues(1)
+    .setMinValues(1)
+    .setOptions([
+      {
+        label: 'RH - Modifier les informations personnelles',
+        value: 'edit_perso_user',
+      },
+      {
+        label: 'RH - Modifier les informations professionnelles',
+        value: 'edit_pro_user',
+      },
+      {
+        label: 'RH - Modifier le poste',
+        value: 'edit_role_user',
+      },
+      {
+        label: 'RH - Modifier le pôle',
+        value: 'edit_pole_user',
+      },
+      {
+        label: 'Poser des congés',
+        value: 'ask_holidays',
+      },
+    ]);
+
+  const selecRow: any = new ActionRowBuilder().addComponents(selectMenu);
 
   const row: any = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setStyle(ButtonStyle.Primary)
-      .setLabel('Modifier les informations personel')
+      .setLabel('Modifier les informations personelles')
       .setCustomId('edit_perso_user'),
     new ButtonBuilder()
       .setStyle(ButtonStyle.Success)
-      .setLabel('Modifier les informations professionnel')
+      .setLabel('Modifier les informations professionnelles')
       .setCustomId('edit_pro_user'),
     new ButtonBuilder()
       .setStyle(ButtonStyle.Secondary)
@@ -280,5 +332,5 @@ export async function sendEmbedMessage(
       .setLabel('Modifier le pole')
       .setCustomId('edit_pole_user'),
   );
-  return { embed, row };
+  return { embed, row, selecRow };
 }

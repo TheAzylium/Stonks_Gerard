@@ -1,5 +1,9 @@
 import { SelectMenu } from '../../../types';
-import { StringSelectMenuInteraction, TextChannel } from 'discord.js';
+import {
+  EmbedBuilder,
+  StringSelectMenuInteraction,
+  TextChannel,
+} from 'discord.js';
 import UserSchema, { USER } from '../../../models/UserModel';
 import RhHistorySchema from '../../../models/RhHistoryModel';
 
@@ -70,19 +74,38 @@ export const modals: SelectMenu = {
       hiringDate: updatedUser.hiringDate
         ? dayjs(updatedUser.hiringDate).format('DD/MM/YYYY')
         : ' ',
-      lastMedicalVisit: updatedUser.last_medical_visit
-        ? dayjs(updatedUser.last_medical_visit).format('DD/MM/YYYY')
-        : ' ',
-      nextMedicalVisit: updatedUser.next_medical_visit
-        ? dayjs(updatedUser.next_medical_visit).format('DD/MM/YYYY')
-        : ' ',
       updatedBy: updatedBy,
     });
+
+    const newEmbedMedical = new EmbedBuilder()
+      .setTitle('Visite médicale')
+      .setColor('#8EFF55')
+      .setFooter({
+        text: `Mis à jour par ${updatedBy} le ${dayjs(
+          updatedUser.updatedAt,
+        ).format('DD/MM/YYYY à HH:mm')}`,
+      })
+      .addFields(
+        {
+          name: 'Dernière visite médicale',
+          value: updatedUser.last_medical_visit
+            ? dayjs(updatedUser.last_medical_visit).format('DD/MM/YYYY')
+            : ' ',
+          inline: true,
+        },
+        {
+          name: 'Prochaine visite médicale',
+          value: updatedUser.next_medical_visit
+            ? dayjs(updatedUser.next_medical_visit).format('DD/MM/YYYY')
+            : ' ',
+          inline: true,
+        },
+      );
 
     const message: any = await interaction.channel.messages.fetch(
       updatedUser.embed_message_id_rh,
     );
-    await message.edit({ embeds: [newEmbed.embed] });
+    await message.edit({ embeds: [newEmbed.embed, newEmbedMedical] });
 
     const previousMessageFormation = await interaction.guild.channels.cache.get(
       channelMap.get('suivi-formation'),

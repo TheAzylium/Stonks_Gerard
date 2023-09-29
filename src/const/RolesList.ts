@@ -14,7 +14,7 @@ export function generatePosteList() {
     },
     {
       label: 'Confirmé',
-      value: rolesMap.get('confirmee'),
+      value: rolesMap.get('confirme'),
     },
     {
       label: 'Senior',

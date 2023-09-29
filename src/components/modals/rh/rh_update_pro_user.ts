@@ -1,5 +1,5 @@
 import { Modals } from '../../../types';
-import { ModalSubmitInteraction } from 'discord.js';
+import { EmbedBuilder, ModalSubmitInteraction } from 'discord.js';
 import UserSchema, { USER } from '../../../models/UserModel';
 import { sendEmbedMessage } from '../../../slashCommands/rh/hire';
 import dayjs from 'dayjs';
@@ -86,19 +86,39 @@ export const modals: Modals = {
       hiringDate: user.hiringDate
         ? dayjs(user.hiringDate).format('DD/MM/YYYY')
         : ' ',
-      lastMedicalVisit: user.last_medical_visit
-        ? dayjs(user.last_medical_visit).format('DD/MM/YYYY')
-        : ' ',
-      nextMedicalVisit: user.next_medical_visit
-        ? dayjs(user.next_medical_visit).format('DD/MM/YYYY')
-        : ' ',
       updatedBy: updatedBy,
+      updatedAt: user.updatedAt,
     });
+
+    const newEmbedMedical = new EmbedBuilder()
+      .setTitle('Visite médicale')
+      .setColor('#8EFF55')
+      .setFooter({
+        text: `Mis à jour par ${updatedBy} le ${dayjs(user.updatedAt).format(
+          'DD/MM/YYYY à HH:mm',
+        )}`,
+      })
+      .addFields(
+        {
+          name: 'Dernière visite médicale',
+          value: user.last_medical_visit
+            ? dayjs(user.last_medical_visit).format('DD/MM/YYYY')
+            : ' ',
+          inline: true,
+        },
+        {
+          name: 'Prochaine visite médicale',
+          value: user.next_medical_visit
+            ? dayjs(user.next_medical_visit).format('DD/MM/YYYY')
+            : ' ',
+          inline: true,
+        },
+      );
 
     const message: any = await interaction.channel.messages.fetch(
       user.embed_message_id_rh,
     );
-    await message.edit({ embeds: [newEmbed.embed] });
+    await message.edit({ embeds: [newEmbed.embed, newEmbedMedical] });
 
     await interaction.reply({
       content: 'Les informations personnelles ont été mises à jour !',
