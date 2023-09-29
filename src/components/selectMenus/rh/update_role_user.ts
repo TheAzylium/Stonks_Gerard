@@ -12,6 +12,7 @@ import { PosteList } from '../../../const/RolesList';
 import { sendEmbedMessage } from '../../../slashCommands/rh/hire';
 import { rolesMap } from '../../../const/rolesManager';
 import { channelMap } from '../../../const/channelManager';
+import { update_contact } from '../../../const/update_contact';
 dayjs.extend(require('dayjs/plugin/customParseFormat'));
 
 const wait = require('node:timers/promises').setTimeout;
@@ -21,6 +22,7 @@ export const modals: SelectMenu = {
     name: 'roles_update',
   },
   execute: async (interaction: StringSelectMenuInteraction) => {
+    await interaction.deferReply({ ephemeral: true });
     const newRole = {
       _id: interaction.values[0],
       name: PosteList.find(option => option.value === interaction.values[0])
@@ -124,9 +126,10 @@ export const modals: SelectMenu = {
       });
     }
 
-    await interaction.reply({
+    await update_contact(interaction);
+
+    await interaction.editReply({
       content: 'Le poste à été mis à jour !',
-      ephemeral: true,
     });
     await wait(5000);
     await interaction.deleteReply();

@@ -51,7 +51,7 @@ const event: BotEvent = {
         }
       }
     } else {
-      console.log('other');
+      // console.log('other');
     }
   },
 };

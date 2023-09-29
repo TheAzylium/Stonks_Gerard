@@ -178,8 +178,6 @@ async function edit_role_user(interaction: StringSelectMenuInteraction) {
     });
   }
 
-  console.log(PosteList);
-
   const menu = new StringSelectMenuBuilder()
     .setMinValues(1)
     .setMaxValues(1)
@@ -231,6 +229,40 @@ async function edit_pole_user(interaction: StringSelectMenuInteraction) {
   await wait(10000);
   await interaction.deleteReply();
 }
+
+async function ask_holidays(interaction: StringSelectMenuInteraction) {
+  const modal = new ModalBuilder()
+    .setTitle('Demande de congés')
+    .setCustomId('ask_holidays');
+
+  const startDateInput = new TextInputBuilder()
+    .setCustomId('start-date')
+    .setLabel('Date de début')
+    .setPlaceholder('DD/MM/YYYY')
+    .setRequired(true)
+    .setStyle(TextInputStyle.Short);
+
+  const endDateInput = new TextInputBuilder()
+    .setCustomId('end-date')
+    .setLabel('Date de fin')
+    .setPlaceholder('DD/MM/YYYY')
+    .setRequired(true)
+    .setStyle(TextInputStyle.Short);
+
+  const reasonInput = new TextInputBuilder()
+    .setCustomId('reason')
+    .setLabel('Raison')
+    .setPlaceholder('Raison')
+    .setRequired(false)
+    .setStyle(TextInputStyle.Paragraph);
+
+  const startDateRow = new ActionRowBuilder().addComponents(startDateInput);
+  const endDateRow = new ActionRowBuilder().addComponents(endDateInput);
+  const reasonRow = new ActionRowBuilder().addComponents(reasonInput);
+
+  modal.addComponents(startDateRow as any, endDateRow as any, reasonRow as any);
+  await interaction.showModal(modal);
+}
 export const modals: SelectMenu = {
   data: {
     name: 'user_action',
@@ -248,6 +280,9 @@ export const modals: SelectMenu = {
         break;
       case 'edit_pole_user':
         await edit_pole_user(interaction);
+        break;
+      case 'ask_holidays':
+        await ask_holidays(interaction);
         break;
       default:
         break;

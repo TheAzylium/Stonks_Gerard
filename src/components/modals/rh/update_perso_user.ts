@@ -4,6 +4,7 @@ import UserSchema, { USER } from '../../../models/UserModel';
 import { sendEmbedMessage } from '../../../slashCommands/rh/hire';
 import dayjs from 'dayjs';
 import { channelMap } from '../../../const/channelManager';
+import { update_contact } from '../../../const/update_contact';
 const wait = require('node:timers/promises').setTimeout;
 
 export const modals: Modals = {
@@ -11,6 +12,7 @@ export const modals: Modals = {
     name: 'edit_perso_user',
   },
   execute: async (interaction: ModalSubmitInteraction) => {
+    await interaction.deferReply({ ephemeral: true });
     const name = interaction.fields.getTextInputValue('name');
     const phone = interaction.fields.getTextInputValue('phone') || undefined;
     const accountNumber =
@@ -46,10 +48,9 @@ export const modals: Modals = {
       .nickname;
 
     if (user.phone) {
-      const previousMessageFormation =
-        await interaction.guild.channels.cache.get(
-          channelMap.get('suivi-formation'),
-        );
+      const previousMessageFormation = interaction.guild.channels.cache.get(
+        channelMap.get('suivi-formation'),
+      );
 
       if (previousMessageFormation.isTextBased) {
         const previousMessage = await (
@@ -103,9 +104,20 @@ export const modals: Modals = {
     );
     await message.edit({ embeds: [newEmbed.embed, newEmbedMedical] });
 
-    await interaction.reply({
+    const currentChannelName = interaction.channel.name;
+
+    const emojiCurrentChannelName = currentChannelName.match(/[👨👩]/);
+
+    await interaction.channel.setName(
+      `${emojiCurrentChannelName ? emojiCurrentChannelName[0] : ''}・${
+        user.name
+      }`,
+    );
+
+    await update_contact(interaction);
+
+    await interaction.editReply({
       content: 'Les informations personnelles ont été mises à jour !',
-      ephemeral: true,
     });
     await wait(5000);
     await interaction.deleteReply();

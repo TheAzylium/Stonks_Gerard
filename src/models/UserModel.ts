@@ -35,6 +35,17 @@ export interface USER {
       updatedBy: string;
     },
   ];
+  vacations: [
+    {
+      _id: string;
+      embed_message_id: string;
+      startDate: Date;
+      endDate: Date;
+      reason: string;
+      status: 'pending' | 'accepted' | 'refused';
+      updatedBy: string;
+    },
+  ];
 }
 
 const UserSchema = new mongoose.Schema(
@@ -108,6 +119,29 @@ const UserSchema = new mongoose.Schema(
         },
         date: {
           type: Date,
+        },
+        updatedBy: {
+          type: String,
+        },
+      },
+    ],
+    vacations: [
+      {
+        embed_message_id: {
+          type: String,
+        },
+        startDate: {
+          type: Date,
+        },
+        endDate: {
+          type: Date,
+        },
+        reason: {
+          type: String,
+        },
+        status: {
+          type: String,
+          enum: ['pending', 'accepted', 'refused'],
         },
         updatedBy: {
           type: String,

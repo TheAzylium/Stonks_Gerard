@@ -7,6 +7,7 @@ import dayjs from 'dayjs';
 import { sendEmbedMessage } from '../../../slashCommands/rh/hire';
 import { PoleList } from '../../../const/PolesList';
 import { rolesMap } from '../../../const/rolesManager';
+import { update_contact } from '../../../const/update_contact';
 
 dayjs.extend(require('dayjs/plugin/customParseFormat'));
 
@@ -17,6 +18,7 @@ export const modals: SelectMenu = {
     name: 'poles_update',
   },
   execute: async (interaction: StringSelectMenuInteraction) => {
+    await interaction.deferReply({ ephemeral: true });
     let newPole: { _id: string; name: string };
     if (interaction.values[0] === '1') {
       newPole = {
@@ -110,9 +112,9 @@ export const modals: SelectMenu = {
     );
     await message.edit({ embeds: [newEmbed.embed, newEmbedMedical] });
 
-    await interaction.reply({
+    await update_contact(interaction);
+    await interaction.editReply({
       content: 'Le pôle à été mis à jour !',
-      ephemeral: true,
     });
     await wait(5000);
     await interaction.deleteReply();
