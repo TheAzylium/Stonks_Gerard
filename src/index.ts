@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import { Client, Collection, GatewayIntentBits } from 'discord.js';
+import { Client, Collection, GatewayIntentBits, Partials } from 'discord.js';
 import { readdirSync } from 'fs';
 import { join } from 'path';
 import { Buttons, Modals, SelectMenu, SlashCommand } from './types';
@@ -14,6 +14,7 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMembers,
   ],
+  partials: [Partials.Channel, Partials.Message, Partials.Reaction],
 });
 
 client.slashCommands = new Collection<string, SlashCommand>();

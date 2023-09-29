@@ -12,9 +12,6 @@ const event: BotEvent = {
     guild.channels.cache.forEach(channel => {
       channelMap.set(formatChannelName(channel.name), channel.id);
     });
-
-    console.log('🗄️ Channel loaded!');
-    console.log(channelMap);
   },
 };
 

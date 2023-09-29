@@ -15,10 +15,8 @@ const event: BotEvent = {
       rolesMap.set(formatRoleName(role.name), role.id);
     });
 
-    console.log('🗄️ Roles loaded!');
     generatePosteList();
     generatePoleList();
-    console.log(rolesMap);
   },
 };
 
