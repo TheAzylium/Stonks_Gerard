@@ -9,6 +9,8 @@ const event: BotEvent = {
   name: Events.MessageReactionAdd,
   once: false,
   async execute(reaction: MessageReaction, user: User) {
+    // Check if is not the bot who reacted
+    if (user.bot) return;
     if (reaction.message.channel.id === channelMap.get('suivi-formation')) {
       const roles = [
         rolesMap.get('formateur'),
