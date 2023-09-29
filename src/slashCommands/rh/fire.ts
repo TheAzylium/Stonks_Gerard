@@ -19,7 +19,7 @@ export const command: SlashCommand = {
   name: 'fire',
   data: new SlashCommandBuilder()
     .setName('fire')
-    .setDescription('Permet de renvoyé le mec @')
+    .setDescription('Permet de renvoyé @')
     .addUserOption(option =>
       option
         .setName('membre')
@@ -93,10 +93,31 @@ export const command: SlashCommand = {
       );
       await findChannel.edit({
         permissionOverwrites: [
-          { id: memberUser.id, deny: [PermissionsBitField.Flags.ViewChannel] },
+          {
+            id: interaction.guild.roles.everyone,
+            deny: [PermissionsBitField.Flags.ViewChannel],
+          },
+          {
+            id: rolesMap.get('rh'),
+            allow: [PermissionsBitField.Flags.ViewChannel],
+          },
+          {
+            id: rolesMap.get('administrateur'),
+            allow: [PermissionsBitField.Flags.ViewChannel],
+          },
+          {
+            id: rolesMap.get('head_security'),
+            allow: [PermissionsBitField.Flags.ViewChannel],
+          },
         ],
       });
 
+      // lastMedicalVisit: channelUser.last_medical_visit
+      //   ? dayjs(channelUser.last_medical_visit).format('DD/MM/YYYY')
+      //   : ' ',
+      //   nextMedicalVisit: channelUser.next_medical_visit
+      //   ? dayjs(channelUser.next_medical_visit).format('DD/MM/YYYY')
+      //   : ' ',
       const user = await interaction.guild.members.fetch(channelUser.discordId);
 
       const newEmbed = await sendEmbedMessage(user.user, {
@@ -108,12 +129,6 @@ export const command: SlashCommand = {
         number_weapon: channelUser.number_weapon?.toString(),
         hiringDate: channelUser.hiringDate
           ? dayjs(channelUser.hiringDate).format('DD/MM/YYYY')
-          : ' ',
-        lastMedicalVisit: channelUser.last_medical_visit
-          ? dayjs(channelUser.last_medical_visit).format('DD/MM/YYYY')
-          : ' ',
-        nextMedicalVisit: channelUser.next_medical_visit
-          ? dayjs(channelUser.next_medical_visit).format('DD/MM/YYYY')
           : ' ',
         updatedBy: updatedByNickname,
       });
@@ -153,6 +168,8 @@ export const command: SlashCommand = {
       }
 
       await message.edit({ embeds: [newEmbed.embed] });
+
+      await UserSchema.deleteOne({ discordId: memberUser.id });
 
       await interaction.reply({
         content: 'Vous avez licencié cette personne!',
