@@ -7,6 +7,7 @@ const activityPossibility: string[] = [
   'PAWL',
   'MISSINGGILET',
   'MISSINGTENUE',
+  'CS',
 ];
 type ActivityName = (typeof activityPossibility)[number];
 
