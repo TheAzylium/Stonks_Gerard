@@ -8,6 +8,10 @@ const activityPossibility: string[] = [
   'MISSINGGILET',
   'MISSINGTENUE',
   'CS',
+  'BILLETS',
+  'SECURISE',
+  'SAISIE',
+  'TRANSFERT',
 ];
 type ActivityName = (typeof activityPossibility)[number];
 
@@ -19,8 +23,9 @@ export interface ACTIVITYMONITORING {
     name: string;
   };
   activity: {
-    name: ActivityName;
+    name: ActivityName | string;
     number?: number;
+    hour?: string;
   };
   createAt: Date;
   updatedAt: Date;
@@ -42,10 +47,12 @@ const ActivityMonitoringSchema = new mongoose.Schema(
     activity: {
       name: {
         type: String,
-        enum: activityPossibility,
       },
       number: {
         type: Number,
+      },
+      hour: {
+        type: String,
       },
     },
   },

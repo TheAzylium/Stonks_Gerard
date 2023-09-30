@@ -2,20 +2,38 @@ import { SlashCommand } from '../../types';
 import {
   CommandInteraction,
   EmbedBuilder,
+  PermissionsBitField,
   SlashCommandBuilder,
+  TextChannel,
 } from 'discord.js';
 import { EntrepriseList } from '../../const/Entreprise';
-import dayjs from 'dayjs';
-import OrderOfTheDaySchema, {
-  ORDER_OF_THE_DAY,
-} from '../../models/OrderOfTheDayModel';
+import { channelMap } from '../../const/channelManager';
+import ActivityMonitoringSchema from '../../models/MonitoringActivityModel';
+import { rolesMap } from '../../const/rolesManager';
+const typeTransfert = [
+  {
+    name: 'Transfert entreprise',
+    value: 'TRANSFERT',
+  },
+  {
+    name: 'Transfert de saisie',
+    value: 'SAISIE',
+  },
+  {
+    name: 'Réhabilitation de billets',
+    value: 'BILLETS',
+  },
+  {
+    name: 'Transfert sécurisé',
+    value: 'SECURISE',
+  },
+];
 
 export const command: SlashCommand = {
   name: 'addtransfert',
   data: new SlashCommandBuilder()
-    .setName('addtransfert')
+    .setName('addtransfertpro')
     .setDescription("Permet d'ajouter un transfert")
-
     .addStringOption(option =>
       option
         .setName('entreprise')
@@ -24,152 +42,109 @@ export const command: SlashCommand = {
         .addChoices(
           ...EntrepriseList.map(entreprise => ({
             name: entreprise.name,
-            value: entreprise.accronyme,
+            value: entreprise.name,
           })),
         ),
     )
     .addStringOption(option =>
       option
-        .setName('jour')
-        .setDescription('Jour du transfert (format JJ/MM/YYYY)')
-        .setRequired(true),
+        .setName('type')
+        .setDescription('Type de transfert')
+        .setRequired(true)
+        .addChoices(...typeTransfert),
     )
     .addStringOption(option =>
       option
         .setName('heure')
-        .setDescription('Heure du transfert (format HH:MM)')
+        .setDescription('Heure du transfert (format HHhMM)')
         .setRequired(true),
     ),
   execute: async (interaction: CommandInteraction) => {
-    const entreprise = interaction.options.get('entreprise').value;
-    const jour: string = interaction.options.get('jour').value.toString();
-    const heure: string = interaction.options.get('heure').value.toString();
+    const roles = [
+      rolesMap.get('chef_equipe'),
+      rolesMap.get('administrateur'),
+      rolesMap.get('head_security'),
+    ];
 
-    // check format jour
+    const member = interaction.guild.members.cache.get(interaction.user.id);
+
     if (
-      jour &&
-      !jour.match(/^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[012])\/\d{4}$/)
+      !member.permissions.has(PermissionsBitField.Flags.Administrator) &&
+      !member.roles.cache.some(role => roles.includes(role.id))
     ) {
       return await interaction.reply({
-        content: 'Le format du jour est incorrect !',
+        content: "Vous n'avez pas la permission de faire cette commande !",
+        ephemeral: true,
       });
     }
-    if (heure && !heure.match(/^([01]\d|2[0-3]):?([0-5]\d)$/)) {
+
+    const entreprise = interaction.options.get('entreprise').value;
+    const hour: string = interaction.options.get('heure').value.toString();
+    const type = interaction.options.get('type').value;
+
+    if (hour && !hour.match(/^([01]\d|2[0-3])h?([0-5]\d)$/)) {
       return await interaction.reply({
         content: "Le format de l'heure est incorrect !",
       });
     }
 
-    const startDate = dayjs(
-      dayjs(jour, 'DD/MM/YYYY').toDate().setHours(0, 0, 0, 0),
-    ).toISOString();
-    const endDate = dayjs(
-      dayjs(jour, 'DD/MM/YYYY').toDate().setHours(23, 59, 59, 999),
-    ).toISOString();
+    let color = '#00ff00';
+    switch (type) {
+      case 'TRANSFERT':
+        color = '#00ff00';
+        break;
+      case 'SAISIE':
+        color = '#ff0000';
+        break;
+      case 'BILLETS':
+        color = '#0000ff';
+        break;
+      case 'SECURISE':
+        color = '#ff00ff';
+        break;
+    }
 
-    const OrderOfTheDay: ORDER_OF_THE_DAY = await OrderOfTheDaySchema.findOne({
-      day: {
-        $gte: startDate,
-        $lte: endDate,
+    const embed = new EmbedBuilder()
+      .addFields(
+        {
+          name: '🏢 Entreprise',
+          value: entreprise.toString(),
+        },
+        {
+          name: '📃 Type',
+          value: typeTransfert.find(t => t.value === type)?.name,
+        },
+        {
+          name: '🕔 Horaire',
+          value: hour.toString(),
+        },
+      )
+      .setColor(color as any);
+
+    const channel = interaction.guild.channels.cache.get(
+      channelMap.get('suivi-activite'),
+    ) as TextChannel;
+
+    const message = await channel.send({ embeds: [embed] });
+    const nicknameSender = (
+      await interaction.guild.members.fetch(interaction.user.id)
+    ).nickname;
+    await ActivityMonitoringSchema.create({
+      messageId: message.id,
+      sendBy: {
+        _id: interaction.user.id,
+        name: nicknameSender,
       },
-    }).lean();
-
-    if (OrderOfTheDay) {
-      const isHourAlreadyTaken = OrderOfTheDay.missions.some(mission => {
-        return mission.hour === heure;
-      });
-      if (isHourAlreadyTaken) {
-        return await interaction.reply({
-          content: "L'heure est déjà prise !",
-        });
-      }
-    }
-
-    let updateOrderOfTheDay: ORDER_OF_THE_DAY;
-    if (!OrderOfTheDay) {
-      updateOrderOfTheDay = await OrderOfTheDaySchema.create({
-        day: dayjs(jour, 'DD/MM/YYYY').toDate().setHours(12, 30, 60, 500),
-        missions: [
-          {
-            target: entreprise,
-            type: 'TRANSFERT',
-            hour: heure,
-          },
-        ],
-      });
-    } else {
-      updateOrderOfTheDay = await OrderOfTheDaySchema.findOneAndUpdate(
-        {
-          _id: OrderOfTheDay._id,
-        },
-        {
-          $push: {
-            missions: {
-              target: entreprise,
-              type: 'SAISIE',
-              hour: heure,
-            },
-          },
-        },
-      ).lean();
-    }
-
-    if (updateOrderOfTheDay.embed_private_message_id) {
-    } else {
-      const embed = new EmbedBuilder()
-        .setTitle(
-          `Ordre du jour du  ${dayjs(updateOrderOfTheDay.day).format(
-            'DD/MM/YYYY',
-          )}`,
-        )
-        .setFooter({ text: 'Ordre du jour' })
-        .setTimestamp()
-        .setColor('#0099ff')
-        .addFields({ value: '🚎 Transfert(s) entreprise(s) 🚎', name: ' ' })
-        .addFields({
-          value:
-            '●▬▬▬▬●<:stonk:1150105029353685205>●▬▬▬▬●●▬▬▬▬●<:stonk:1150105029353685205>●▬▬▬▬●',
-          name: ' ',
-        });
-      updateOrderOfTheDay.missions.forEach(mission => {
-        if (mission.type === 'TRANSFERT') {
-          embed.addFields({
-            name: `${mission.hour} - ${mission.target}`,
-            value: ' ',
-          });
-        } else if (mission.type === 'SAISIE') {
-          embed.addFields({
-            name: `${mission.hour} - ${mission.target}`,
-            value: ' ',
-          });
-        } else if (mission.type === 'SECURITY') {
-          embed.addFields({
-            name: `${mission.hour} - ${mission.target}`,
-            value: ' ',
-          });
-        }
-      });
-      embed
-        .addFields({
-          value:
-            '●▬▬▬▬●<:stonk:1150105029353685205>●▬▬▬▬●●▬▬▬▬●<:stonk:1150105029353685205>●▬▬▬▬●',
-          name: ' ',
-        })
-        .addFields({
-          value:
-            '🏧 Remplissage ATM entreprises en dessous de 10.000$ <:gtamoney:1150468326011711548>',
-          name: ' ',
-        });
-
-      const sentMessage = await interaction.channel?.send({ embeds: [embed] });
-
-      // add button
-
-      const embedId = sentMessage?.id;
-    }
+      activity: {
+        name: type,
+        hour: hour,
+      },
+    });
 
     return await interaction.reply({
-      content: 'En cours de dev',
+      content: `${typeTransfert.find(t => t.value === type)
+        ?.name} pour ${entreprise} ajouté !`,
+      ephemeral: true,
     });
   },
 };

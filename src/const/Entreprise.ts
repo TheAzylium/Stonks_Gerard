@@ -1,6 +1,6 @@
 export const EntrepriseList = [
   {
-    name: 'FightForSub',
+    name: 'Fight For Style',
     accronyme: 'FFS',
   },
   {
@@ -10,12 +10,10 @@ export const EntrepriseList = [
   {
     name: 'Blaine County Sheriff Office',
     accronyme: 'BCSO',
-    saisie: true,
   },
   {
     name: 'Los Santos Police Department',
     accronyme: 'LSPD',
-    saisie: true,
   },
   {
     name: 'Chateau Marius',
@@ -36,7 +34,6 @@ export const EntrepriseList = [
   {
     name: 'San Andreas State Police',
     accronyme: 'SASP',
-    saisie: true,
   },
   {
     name: 'STONK',
