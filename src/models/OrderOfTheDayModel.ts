@@ -3,8 +3,7 @@ import mongoose from 'mongoose';
 export interface ORDER_OF_THE_DAY {
   _id: string;
   day: Date;
-  embed_private_message_id: string;
-  embed_public_message_id: string;
+  embed_message_id: string;
   updatedAt: Date;
   createdAt: Date;
   missions: [
@@ -13,7 +12,7 @@ export interface ORDER_OF_THE_DAY {
       target: string;
       hour: string;
       nbrAgent?: string;
-      type: 'SAISIE' | 'SECURITY' | 'TRANSFERT';
+      type: 'SAISIE' | 'SECURITY' | 'TRANSFERT' | 'BILLETS' | 'SECURISE';
     },
   ];
 }
@@ -33,17 +32,14 @@ const OrderOfTheDaySchema = new mongoose.Schema(
         },
         type: {
           type: String,
-          enum: ['SAISIE', 'SECURITY', 'TRANSFERT'],
+          enum: ['SAISIE', 'SECURITY', 'TRANSFERT', 'BILLETS', 'SECURISE'],
         },
       },
     ],
     day: {
       type: Date,
     },
-    embed_private_message_id: {
-      type: String,
-    },
-    embed_public_message_id: {
+    embed_message_id: {
       type: String,
     },
   },

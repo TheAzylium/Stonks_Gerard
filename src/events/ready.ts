@@ -1,6 +1,9 @@
 import { BotEvent } from '../types';
 import { Client, Events } from 'discord.js';
 import mongoose from 'mongoose';
+import { update_holidays } from '../cronjob/holidays';
+import { CronJob } from 'cron';
+import { order_of_the_days } from '../cronjob/order_of_the_days';
 
 const event: BotEvent = {
   name: Events.ClientReady,
@@ -13,6 +16,20 @@ const event: BotEvent = {
       console.log('❌ Error while connecting to MongoDB');
     }
     console.log(`💪 Logged in as ${client.user?.tag}`);
+    await update_holidays(client);
+    await order_of_the_days(client);
+    const job = new CronJob(
+      '0 9 * * *',
+      async () => {
+        await update_holidays(client);
+        await order_of_the_days(client);
+      },
+      null,
+      true,
+      'Europe/Paris',
+    );
+
+    job.start();
   },
 };
 
