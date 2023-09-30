@@ -10,7 +10,7 @@ import { EntrepriseList } from '../../const/Entreprise';
 import { channelMap } from '../../const/channelManager';
 import ActivityMonitoringSchema from '../../models/MonitoringActivityModel';
 import { rolesMap } from '../../const/rolesManager';
-const typeTransfert = [
+export const typeTransfert = [
   {
     name: 'Transfert entreprise',
     value: 'TRANSFERT',

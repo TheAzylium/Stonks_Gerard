@@ -37,7 +37,7 @@ export async function order_of_the_days(client: Client) {
   });
 
   if (!embedMessage) {
-    const embedMessage = generateEmptyEmbed();
+    const embedMessage = generateEmbedOrderOfTheDay();
     const message = await channel.send({ embeds: [embedMessage] });
 
     const orderOfTheDay: ORDER_OF_THE_DAY = await OrderOfTheDay.findOne({
@@ -82,20 +82,73 @@ export async function order_of_the_days(client: Client) {
   });
 }
 
-function capitalizeFirstLetter(string: string) {
+export function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function generateEmptyEmbed() {
+export function generateEmbedOrderOfTheDay(
+  missions?: ORDER_OF_THE_DAY['missions'],
+) {
   const today = dayjs();
-  return new EmbedBuilder()
+  const embed = new EmbedBuilder()
     .setTitle(
       `Ordre du jour ${capitalizeFirstLetter(
         today.format('dddd'),
       )} ${today.format('DD/MM')}`,
     )
     .addFields({ name: '🚎 Transfert(s) entreprise(s) 🚎', value: ' ' })
-    .addFields({ name: '❌ Aucun', value: ' ' })
+    .setColor('#00ff00');
+
+  if (!missions) {
+    embed.addFields({ name: '❌ Aucun', value: ' ' });
+  } else {
+    // reorder mission by hour asc carefully because hour is like HHhMM
+    const reorderedMissions = missions.sort((a, b) => {
+      const timeA = parseInt(a.hour.replace('h', ''), 10);
+      const timeB = parseInt(b.hour.replace('h', ''), 10);
+
+      if (timeA < 800 && timeB >= 800) return -1;
+      if (timeB < 800 && timeA >= 800) return 1;
+
+      return timeA - timeB;
+    });
+
+    reorderedMissions.forEach(mission => {
+      let typeTranslated = '';
+      let emoji = '';
+      switch (mission.type) {
+        case 'BILLETS':
+          typeTranslated = 'Réhabilitation de billets';
+          emoji = '💵';
+          break;
+        case 'SAISIE':
+          typeTranslated = 'Transfert de saisie';
+          emoji = '🔫';
+          break;
+        case 'SECURISE':
+          typeTranslated = 'Transfert sécurisé';
+          emoji = '🔒';
+          break;
+        case 'TRANSFERT':
+          typeTranslated = 'Transfert entreprise';
+          emoji = '🚎';
+          break;
+      }
+      if (mission.type === 'SECURITY') {
+        embed.addFields({
+          name: `🕵️ ${mission.target} - ${mission.where} 🕵️‍♀️`,
+          value: `🕔 ${mission.hour} - ${mission.nbrAgent} agent(s)`,
+        });
+      } else {
+        embed.addFields({
+          name: `🏢 ${mission.target} - ${typeTranslated} ${emoji}`,
+          value: `🕔 ${mission.hour}`,
+        });
+      }
+    });
+  }
+
+  embed
     .addFields({
       name: ' ',
       value:
@@ -105,6 +158,7 @@ function generateEmptyEmbed() {
       value:
         '🏧 Remplissage ATM entreprises en dessous de 10.000$ <:gtamoney:1150468326011711548>',
       name: ' ',
-    })
-    .setColor('#00ff00');
+    });
+
+  return embed;
 }

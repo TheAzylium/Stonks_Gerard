@@ -12,6 +12,7 @@ export interface ORDER_OF_THE_DAY {
       target: string;
       hour: string;
       nbrAgent?: string;
+      where?: string;
       type: 'SAISIE' | 'SECURITY' | 'TRANSFERT' | 'BILLETS' | 'SECURISE';
     },
   ];
@@ -28,6 +29,9 @@ const OrderOfTheDaySchema = new mongoose.Schema(
           type: String,
         },
         nbrAgent: {
+          type: String,
+        },
+        where: {
           type: String,
         },
         type: {
