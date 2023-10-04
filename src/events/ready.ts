@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { update_holidays } from '../cronjob/holidays';
 import { CronJob } from 'cron';
 import { order_of_the_days } from '../cronjob/order_of_the_days';
+import { generate_frequence_cron } from '../cronjob/radio';
 
 const event: BotEvent = {
   name: Events.ClientReady,
@@ -18,11 +19,13 @@ const event: BotEvent = {
     console.log(`💪 Logged in as ${client.user?.tag}`);
     await update_holidays(client);
     await order_of_the_days(client);
+    await generate_frequence_cron(client);
     const job = new CronJob(
       '0 9 * * *',
       async () => {
         await update_holidays(client);
         await order_of_the_days(client);
+        await generate_frequence_cron(client);
       },
       null,
       true,
